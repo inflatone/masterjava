@@ -2,6 +2,7 @@ package ru.javaops.masterjava.matrix;
 
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -12,7 +13,7 @@ import java.util.stream.IntStream;
  */
 public class MatrixUtil {
 
-    public static int[][] concurrentMultiply(int[][] matrixA, int[][] matrixB, ExecutorService executor) throws InterruptedException, ExecutionException {
+    public static int[][] concurrentMultiplyWithCompletionService(int[][] matrixA, int[][] matrixB, ExecutorService executor) {
         final int matrixSize = matrixA.length;
         final int[][] matrixC = new int[matrixSize][matrixSize];
         final CompletionService<Void> completionService = new ExecutorCompletionService<>(executor);
@@ -22,6 +23,43 @@ public class MatrixUtil {
         while (!futures.isEmpty()) {
             futures.remove(completionService.poll());
         }
+        return matrixC;
+    }
+
+    public static int[][] concurrentMultiply(int[][] matrixA, int[][] matrixB, ExecutorService executor) throws InterruptedException {
+        final int matrixSize = matrixA.length;
+        final int[][] matrixC = new int[matrixSize][matrixSize];
+        final CompletionService<Void> completionService = new ExecutorCompletionService<>(executor);
+        Set<Callable<Void>> tasks = IntStream.range(0, matrixSize)
+                .<Callable<Void>>mapToObj(j -> () -> calculate(matrixA, matrixB, new int[matrixSize], matrixC, j, matrixSize))
+                .collect(Collectors.toSet());
+        executor.invokeAll(tasks);
+        return matrixC;
+    }
+
+    public static int[][] concurrentMultiply2(int[][] matrixA, int[][] matrixB, ExecutorService executor) throws InterruptedException {
+        final int matrixSize = matrixA.length;
+        final int[][] matrixC = new int[matrixSize][matrixSize];
+        final CountDownLatch latch = new CountDownLatch(matrixSize);
+        for (int row = 0; row < matrixSize; row++) {
+            final int[] rowA = matrixA[row];
+            final int[] rowC = matrixC[row];
+            executor.submit(() -> {
+                calculate(matrixB, matrixSize, rowA, rowC);
+                latch.countDown();
+            });
+        }
+        latch.await();
+        return matrixC;
+    }
+
+    public static int[][] concurrentMultiplyStream(int[][] matrixA, int[][] matrixB) {
+        final int matrixSize = matrixA.length;
+        final int[][] matrixC = new int[matrixSize][matrixSize];
+        IntStream.range(0, matrixSize)
+                .parallel()
+                .forEach(row -> calculate(matrixB, matrixSize, matrixA[row], matrixC[row]));
+
         return matrixC;
     }
 
@@ -55,6 +93,16 @@ public class MatrixUtil {
         return null;
     }
 
+    private static void calculate(int[][] matrixB, int matrixSize, int[] rowA, int[] rowC) {
+        for (int idx = 0; idx < matrixSize; idx++) {
+            final int elA = rowA[idx];
+            final int[] rowB = matrixB[idx];
+            for (int col = 0; col < matrixSize; col++) {
+                rowC[col] += elA * rowB[col];
+            }
+        }
+    }
+
     public static int[][] create(int size) {
         int[][] matrix = new int[size][size];
         Random rn = new Random();
@@ -71,7 +119,6 @@ public class MatrixUtil {
         final int matrixSize = matrixA.length;
         for (int i = 0; i < matrixSize; i++) {
             for (int j = 0; j < matrixSize; j++) {
-                //System.out.println(matrixA[i][j] + " : " + matrixB[i][j]);
                 if (matrixA[i][j] != matrixB[i][j]) {
                     return false;
                 }
