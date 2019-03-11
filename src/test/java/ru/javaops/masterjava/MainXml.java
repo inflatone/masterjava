@@ -11,10 +11,12 @@ import ru.javaops.masterjava.xml.schema.User;
 import ru.javaops.masterjava.xml.util.JaxbParser;
 import ru.javaops.masterjava.xml.util.Schemas;
 import ru.javaops.masterjava.xml.util.StaxStreamProcessor;
+import ru.javaops.masterjava.xml.util.XsltProcessor;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.XMLEvent;
+import javax.xml.transform.TransformerException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Writer;
@@ -49,18 +51,25 @@ public class MainXml {
         MainXml main = new MainXml();
 
 
-        Set<User> users = main.parceByJaxb(projectName, payloadUrl);
-        users.forEach(System.out::println);
-        System.out.println();
+        Set<User> users = main.parseByJaxb(projectName, payloadUrl);
+        printUsers(users);
 
         String html = toHtml(users, projectName, Paths.get("out/usersJaxb.html"));
         System.out.println(html);
+
+        System.out.println();
+        printUsers(processByStax(projectName, payloadUrl));
+
+        html = main.transform(projectName, payloadUrl);
         try (Writer writer = Files.newBufferedWriter(Paths.get("out/users.html"))) {
             writer.write(html);
         }
+
+    }
+
+    private static void printUsers(Iterable<User> users) {
+        users.forEach(u -> System.out.printf("Name: '%s', email: %s%n", u.getValue(), u.getEmail()));
         System.out.println();
-        users = processByStax(projectName, payloadUrl);
-        users.forEach(System.out::println);
     }
 
     private static Set<User> processByStax(String projectName, URL payloadUrl) throws Exception {
@@ -113,7 +122,18 @@ public class MainXml {
 
     }
 
-    private Set<User> parceByJaxb(String projectName, URL payloadUrl) throws Exception {
+    private String transform(String projectName, URL payloadUrl) throws IOException, TransformerException {
+        URL xsl = Resources.getResource("groups.xsl");
+        try (InputStream xmlIn = payloadUrl.openStream();
+             InputStream xslIn = xsl.openStream()
+        ) {
+            XsltProcessor processor = new XsltProcessor(xslIn);
+            processor.setParameter("projectName", projectName);
+            return processor.transform(xmlIn);
+        }
+    }
+
+    private Set<User> parseByJaxb(String projectName, URL payloadUrl) throws Exception {
         JaxbParser parser = new JaxbParser(ObjectFactory.class);
         parser.setSchema(Schemas.ofClasspath("payload.xsd"));
         try (InputStream is = payloadUrl.openStream()) {
