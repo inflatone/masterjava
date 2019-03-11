@@ -12,6 +12,7 @@ import ru.javaops.masterjava.xml.util.JaxbParser;
 import ru.javaops.masterjava.xml.util.Schemas;
 import ru.javaops.masterjava.xml.util.StaxStreamProcessor;
 
+import javax.xml.bind.JAXBException;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.XMLEvent;
 import java.io.IOException;
@@ -75,36 +76,27 @@ public class MainXml {
 
     private static Set<String> parseGroupNames(StaxStreamProcessor processor, String projectName) throws XMLStreamException {
         final Set<String> result = new HashSet<>();
-        projects:
-        while (processor.doUntil(XMLEvent.START_ELEMENT, "Project")) {
+        while (processor.startElement("Project", "Projects")) {
             if (projectName.equals(processor.getAttribute("name"))) {
-                for (String element = getNextStartElement(processor); element != null; element = getNextStartElement(processor)) {
-                    if (!element.equals("Group")) {
-                        break projects;
-                    }
+                while (processor.startElement("Group", "Project")) {
                     result.add(processor.getAttribute("name"));
                 }
+                break;
             }
         }
         return result;
     }
 
-    private static Set<User> parseUsers(StaxStreamProcessor processor, Set<String> groupNames) throws XMLStreamException {
+    private static Set<User> parseUsers(StaxStreamProcessor processor, Set<String> groupNames) throws XMLStreamException, JAXBException {
         Set<User> result = new TreeSet<>(USER_COMPARATOR);
+        JaxbParser parser = new JaxbParser(User.class);
         while (processor.doUntil(XMLEvent.START_ELEMENT, "User")) {
             String groupRefs = processor.getAttribute("groupRefs");
             if (!Collections.disjoint(groupNames, Splitter.on(' ').splitToList(nullToEmpty(groupRefs)))) {
-                User user = new User();
-                user.setEmail(processor.getAttribute("email"));
-                user.setValue(processor.getText());
-                result.add(user);
+                result.add(parser.unmarshal(processor.getReader(), User.class));
             }
         }
         return result;
-    }
-
-    private static String getNextStartElement(StaxStreamProcessor processor) throws XMLStreamException {
-        return processor.doUntilAny(XMLEvent.START_ELEMENT, "Project", "Group", "Users");
     }
 
     private static String toHtml(Set<User> users, String projectName, Path path) throws IOException {
