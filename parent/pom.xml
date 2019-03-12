@@ -51,28 +51,6 @@
             <version>RELEASE</version>
         </dependency>
 		
-		<dependency>
-            <groupId>org.openjdk.jmh</groupId>
-            <artifactId>jmh-core</artifactId>
-            <version>RELEASE</version>
-        </dependency>
-        <dependency>
-            <groupId>org.openjdk.jmh</groupId>
-            <artifactId>jmh-generator-annprocess</artifactId>
-            <version>RELEASE</version>
-            <scope>provided</scope>
-        </dependency>
-		<dependency>
-            <groupId>one.util</groupId>
-            <artifactId>streamex</artifactId>
-            <version>RELEASE</version>
-        </dependency>
-		<dependency>
-            <groupId>com.j2html</groupId>
-            <artifactId>j2html</artifactId>
-            <version>RELEASE</version>
-        </dependency>
-		
         <!--Test-->
         <dependency>
             <groupId>junit</groupId>

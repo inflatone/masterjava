@@ -145,9 +145,7 @@ public class MainXml {
             Set<Project.Group> groups = new HashSet<>(project.getGroup());  // identity compare
             return StreamEx.of(payload.getUsers().getUser())
                     .filter(u -> !Collections.disjoint(groups, u.getGroupRefs()))
-                    .collect(Collectors.toCollection(
-                            () -> new TreeSet<>(USER_COMPARATOR))
-                    );
+                    .toCollection(() -> new TreeSet<>(USER_COMPARATOR));
         }
     }
 }
