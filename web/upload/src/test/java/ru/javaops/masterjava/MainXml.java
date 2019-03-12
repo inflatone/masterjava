@@ -8,10 +8,7 @@ import ru.javaops.masterjava.xml.schema.ObjectFactory;
 import ru.javaops.masterjava.xml.schema.Payload;
 import ru.javaops.masterjava.xml.schema.Project;
 import ru.javaops.masterjava.xml.schema.User;
-import ru.javaops.masterjava.xml.util.JaxbParser;
-import ru.javaops.masterjava.xml.util.Schemas;
-import ru.javaops.masterjava.xml.util.StaxStreamProcessor;
-import ru.javaops.masterjava.xml.util.XsltProcessor;
+import ru.javaops.masterjava.xml.util.*;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.stream.XMLStreamException;
@@ -29,13 +26,6 @@ import java.util.*;
 import static com.google.common.base.Strings.nullToEmpty;
 import static j2html.TagCreator.*;
 
-/**
- * User: gkislin
- * Date: 05.08.2015
- *
- * @link http://caloriesmng.herokuapp.com/
- * @link https://github.com/JavaOPs/topjava
- */
 public class MainXml {
 
     public static final Comparator<User> USER_COMPARATOR = Comparator.comparing(User::getValue).thenComparing(User::getEmail);
@@ -97,11 +87,12 @@ public class MainXml {
 
     private static Set<User> parseUsers(StaxStreamProcessor processor, Set<String> groupNames) throws XMLStreamException, JAXBException {
         Set<User> result = new TreeSet<>(USER_COMPARATOR);
-        JaxbParser parser = new JaxbParser(User.class);
+        JaxbParser parser = new JaxbParser(ObjectFactory.class);
+        JaxbUnmarshaller unmarshaller = parser.createUnmarshaller();
         while (processor.doUntil(XMLEvent.START_ELEMENT, "User")) {
             String groupRefs = processor.getAttribute("groupRefs");
             if (!Collections.disjoint(groupNames, Splitter.on(' ').splitToList(nullToEmpty(groupRefs)))) {
-                result.add(parser.unmarshal(processor.getReader(), User.class));
+                result.add(unmarshaller.unmarshal(processor.getReader(), User.class));
             }
         }
         return result;
@@ -117,8 +108,6 @@ public class MainXml {
                 head().with(title(projectName + " users")),
                 body().with(h1(projectName + " users"), table)
         ).render();
-
-
     }
 
     private String transform(String projectName, URL payloadUrl) throws IOException, TransformerException {
@@ -134,9 +123,10 @@ public class MainXml {
 
     private Set<User> parseByJaxb(String projectName, URL payloadUrl) throws Exception {
         JaxbParser parser = new JaxbParser(ObjectFactory.class);
+        JaxbUnmarshaller unmarshaller = parser.createUnmarshaller();
         parser.setSchema(Schemas.ofClasspath("payload.xsd"));
         try (InputStream is = payloadUrl.openStream()) {
-            Payload payload = parser.unmarshal(is);
+            Payload payload = unmarshaller.unmarshal(is);
             Project project = StreamEx.of(payload.getProjects().getProject())
                     .filterBy(Project::getName, projectName)
                     .findAny()
