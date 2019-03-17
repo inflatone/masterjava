@@ -1,12 +1,12 @@
 package ru.javaops.masterjava.persist.dao;
 
-import com.bertoncelj.jdbi.entitymapper.EntityMapperFactory;
-import org.skife.jdbi.v2.sqlobject.*;
-import org.skife.jdbi.v2.sqlobject.customizers.BatchChunkSize;
-import org.skife.jdbi.v2.sqlobject.customizers.RegisterMapperFactory;
-import ru.javaops.masterjava.persist.model.User;
+        import com.bertoncelj.jdbi.entitymapper.EntityMapperFactory;
+        import org.skife.jdbi.v2.sqlobject.*;
+        import org.skife.jdbi.v2.sqlobject.customizers.BatchChunkSize;
+        import org.skife.jdbi.v2.sqlobject.customizers.RegisterMapperFactory;
+        import ru.javaops.masterjava.persist.model.User;
 
-import java.util.List;
+        import java.util.List;
 
 @RegisterMapperFactory(EntityMapperFactory.class)
 public abstract class UserDao implements AbstractDao {
@@ -35,6 +35,9 @@ public abstract class UserDao implements AbstractDao {
     @Override
     public abstract void clean();
 
-    @SqlBatch("INSERT INTO users (full_name, email, flag) VALUES (:fullName, :email, CAST(:flag AS USER_FLAG)) ")
-    public abstract void insertBatch(@BindBean List<User> users, @BatchChunkSize int chunkSize);
+    //    https://habrahabr.ru/post/264281/
+    @SqlBatch("INSERT INTO users (full_name, email, flag) VALUES (:fullName, :email, CAST(:flag AS USER_FLAG)) " +
+            "ON CONFLICT DO NOTHING")
+    //      "ON CONFLICT (email) DO UPDATE SET full_name=:fullName, flag=CAST(:flag AS USER_FLAG)")
+    public abstract int[] insertBatch(@BindBean List<User> users, @BatchChunkSize int chunkSize);
 }
