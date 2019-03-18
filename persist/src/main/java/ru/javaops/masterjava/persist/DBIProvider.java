@@ -1,20 +1,29 @@
 package ru.javaops.masterjava.persist;
 
+import lombok.extern.slf4j.Slf4j;
+import org.skife.jdbi.v2.DBI;
 import org.skife.jdbi.v2.logging.SLF4JLog;
 import org.skife.jdbi.v2.tweak.ConnectionFactory;
-import org.skife.jdbi.v2.DBI;
-import org.slf4j.Logger;
 import ru.javaops.masterjava.persist.dao.AbstractDao;
 
 import javax.naming.InitialContext;
 import javax.sql.DataSource;
 
-import static org.slf4j.LoggerFactory.getLogger;
-
+@Slf4j
 public class DBIProvider {
-    private static final Logger log = getLogger(DBIProvider.class);
-
     private volatile static ConnectionFactory connectionFactory = null;
+
+    public static void init(ConnectionFactory connectionFactory) {
+        DBIProvider.connectionFactory = connectionFactory;
+    }
+
+    public static DBI getDBI() {
+        return DBIHolder.jDBI;
+    }
+
+    public static <T extends AbstractDao> T getDao(Class<T> daoClass) {
+        return DBIHolder.jDBI.onDemand(daoClass);
+    }
 
     private static class DBIHolder {
         static final DBI jDBI;
@@ -36,18 +45,6 @@ public class DBIProvider {
             jDBI = dbi;
             jDBI.setSQLLog(new SLF4JLog());
         }
-    }
-
-    public static void init(ConnectionFactory connectionFactory) {
-        DBIProvider.connectionFactory = connectionFactory;
-    }
-
-    public static DBI getDBI() {
-        return DBIHolder.jDBI;
-    }
-
-    public static <T extends AbstractDao> T getDao(Class<T> daoClass) {
-        return DBIHolder.jDBI.onDemand(daoClass);
     }
 
 }

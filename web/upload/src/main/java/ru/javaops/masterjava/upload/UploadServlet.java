@@ -1,6 +1,7 @@
 package ru.javaops.masterjava.upload;
 
 import com.google.common.collect.ImmutableMap;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.thymeleaf.context.WebContext;
@@ -21,8 +22,8 @@ import static ru.javaops.masterjava.common.web.ThymeleafListener.engine;
 
 @WebServlet(urlPatterns = "/", loadOnStartup = 1)
 @MultipartConfig(fileSizeThreshold = 1024 * 1024 * 10) // 10 mb in memory limit
+@Slf4j
 public class UploadServlet extends HttpServlet {
-    private static final Logger log = LoggerFactory.getLogger(UploadServlet.class);
     private static final int CHUNK_SIZE = 2000;
 
     private final UserProcessor userProcessor = new UserProcessor();
