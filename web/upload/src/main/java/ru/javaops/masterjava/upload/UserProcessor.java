@@ -1,8 +1,5 @@
 package ru.javaops.masterjava.upload;
 
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import ru.javaops.masterjava.persist.DBIProvider;
@@ -16,7 +13,6 @@ import ru.javaops.masterjava.xml.util.StaxStreamProcessor;
 import javax.xml.bind.JAXBException;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.XMLEvent;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -38,28 +34,10 @@ public class UserProcessor {
     /*
      * return failed users chunks
      */
-    public List<FailedEmails> process(final InputStream is, int chunkSize) throws XMLStreamException, JAXBException {
-        log.info("Start processing with chunkSize=" + chunkSize);
-        Map<String, Future<List<String>>> chunkFutures = new LinkedHashMap<>();  // ordered map (emailRange -> chunk future)
-        int id = userDao.getSeqAndSkip(chunkSize);
-        List<User> chunk = new ArrayList<>(chunkSize);
-        val processor = new StaxStreamProcessor(is);
-        val unmarshaller = jaxbParser.createUnmarshaller();
-        while (processor.doUntil(XMLEvent.START_ELEMENT, "User")) {
-            ru.javaops.masterjava.xml.schema.User xmlUser = unmarshaller.unmarshal(processor.getReader(), ru.javaops.masterjava.xml.schema.User.class);
-            final User user = new User(id++, xmlUser.getValue(), xmlUser.getEmail(), UserFlag.valueOf(xmlUser.getFlag().value()), null);
-            chunk.add(user);
-            if (chunk.size() == chunkSize) {
-                addChunkFutures(chunkFutures, chunk);
-                chunk = new ArrayList<>(chunkSize);
-                id = userDao.getSeqAndSkip(chunkSize);
-            }
-        }
+    public List<PayloadProcessor.FailedEmails> process(final StaxStreamProcessor processor, int chunkSize) throws XMLStreamException, JAXBException {
 
-        if (!chunk.isEmpty()) {
-            addChunkFutures(chunkFutures, chunk);
-        }
-        List<FailedEmails> failed = new ArrayList<>();
+        Map<String, Future<List<String>>> chunkFutures = createChunkFutures(processor, chunkSize);
+        List<PayloadProcessor.FailedEmails> failed = new ArrayList<>();
         List<String> allAlreadyPresents = new ArrayList<>();
         chunkFutures.forEach((emailRange, future) -> {
             try {
@@ -68,15 +46,35 @@ public class UserProcessor {
                 allAlreadyPresents.addAll(alreadyPresentsInChunk);
             } catch (InterruptedException | ExecutionException e) {
                 log.error(emailRange + " failed", e);
-                failed.add(new FailedEmails(emailRange, e.toString()));
+                failed.add(new PayloadProcessor.FailedEmails(emailRange, e.toString()));
             }
         });
         if (!allAlreadyPresents.isEmpty()) {
-            failed.add(new FailedEmails(allAlreadyPresents.toString(), "already presents"));
+            failed.add(new PayloadProcessor.FailedEmails(allAlreadyPresents.toString(), "already presents"));
         }
-
-
         return failed;
+    }
+
+    private Map<String, Future<List<String>>> createChunkFutures(final StaxStreamProcessor processor, int chunkSize) throws JAXBException, XMLStreamException {
+        log.info("Start processing with chunkSize=" + chunkSize);
+        Map<String, Future<List<String>>> result = new LinkedHashMap<>();  // ordered map (emailRange -> chunk future)
+        int id = userDao.getSeqAndSkip(chunkSize);
+        List<User> chunk = new ArrayList<>(chunkSize);
+        val unmarshaller = jaxbParser.createUnmarshaller();
+        while (processor.doUntil(XMLEvent.START_ELEMENT, "User")) {
+            ru.javaops.masterjava.xml.schema.User xmlUser = unmarshaller.unmarshal(processor.getReader(), ru.javaops.masterjava.xml.schema.User.class);
+            final User user = new User(id++, xmlUser.getValue(), xmlUser.getEmail(), UserFlag.valueOf(xmlUser.getFlag().value()), null);
+            chunk.add(user);
+            if (chunk.size() == chunkSize) {
+                addChunkFutures(result, chunk);
+                chunk = new ArrayList<>(chunkSize);
+                id = userDao.getSeqAndSkip(chunkSize);
+            }
+        }
+        if (!chunk.isEmpty()) {
+            addChunkFutures(result, chunk);
+        }
+        return result;
     }
 
     private void addChunkFutures(Map<String, Future<List<String>>> chunkFutures, List<User> chunk) {
@@ -84,17 +82,5 @@ public class UserProcessor {
         Future<List<String>> future = executorService.submit(() -> userDao.insertAndGetConflictEmails(chunk));
         chunkFutures.put(emailRange, future);
         log.info("Submit chunk: " + emailRange);
-    }
-
-    @AllArgsConstructor
-    @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
-    public static class FailedEmails {
-        String emailOrRange;
-        String reason;
-
-        @Override
-        public String toString() {
-            return emailOrRange + " : " + reason;
-        }
     }
 }
