@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import ru.javaops.masterjava.persist.DBIProvider;
 import ru.javaops.masterjava.persist.dao.UserDao;
+import ru.javaops.masterjava.persist.model.City;
 import ru.javaops.masterjava.persist.model.User;
 import ru.javaops.masterjava.persist.model.type.UserFlag;
 import ru.javaops.masterjava.xml.schema.ObjectFactory;
@@ -21,6 +22,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import ru.javaops.masterjava.upload.PayloadProcessor.FailedEmails;
 
 @Slf4j
 public class UserProcessor {
@@ -34,10 +36,12 @@ public class UserProcessor {
     /*
      * return failed users chunks
      */
-    public List<PayloadProcessor.FailedEmails> process(final StaxStreamProcessor processor, int chunkSize) throws XMLStreamException, JAXBException {
-
-        Map<String, Future<List<String>>> chunkFutures = createChunkFutures(processor, chunkSize);
+    public List<PayloadProcessor.FailedEmails> process(
+            final StaxStreamProcessor processor, Map<String, City> cities, int chunkSize
+    ) throws XMLStreamException, JAXBException {
         List<PayloadProcessor.FailedEmails> failed = new ArrayList<>();
+        Map<String, Future<List<String>>> chunkFutures = createChunkFutures(processor, cities, failed, chunkSize);
+
         List<String> allAlreadyPresents = new ArrayList<>();
         chunkFutures.forEach((emailRange, future) -> {
             try {
@@ -55,20 +59,28 @@ public class UserProcessor {
         return failed;
     }
 
-    private Map<String, Future<List<String>>> createChunkFutures(final StaxStreamProcessor processor, int chunkSize) throws JAXBException, XMLStreamException {
+    private Map<String, Future<List<String>>> createChunkFutures(
+            final StaxStreamProcessor processor, Map<String, City> cities,
+            List<PayloadProcessor.FailedEmails> failed, int chunkSize
+    ) throws JAXBException, XMLStreamException {
         log.info("Start processing with chunkSize=" + chunkSize);
         Map<String, Future<List<String>>> result = new LinkedHashMap<>();  // ordered map (emailRange -> chunk future)
         int id = userDao.getSeqAndSkip(chunkSize);
         List<User> chunk = new ArrayList<>(chunkSize);
         val unmarshaller = jaxbParser.createUnmarshaller();
         while (processor.doUntil(XMLEvent.START_ELEMENT, "User")) {
+            String cityRef = processor.getAttribute("city");  // unmarshal doesn't get city ref
             ru.javaops.masterjava.xml.schema.User xmlUser = unmarshaller.unmarshal(processor.getReader(), ru.javaops.masterjava.xml.schema.User.class);
-            final User user = new User(id++, xmlUser.getValue(), xmlUser.getEmail(), UserFlag.valueOf(xmlUser.getFlag().value()), null);
-            chunk.add(user);
-            if (chunk.size() == chunkSize) {
-                addChunkFutures(result, chunk);
-                chunk = new ArrayList<>(chunkSize);
-                id = userDao.getSeqAndSkip(chunkSize);
+            if (cities.get(cityRef) == null) {
+                failed.add(new FailedEmails(xmlUser.getEmail(), "City '" + cityRef + "' is not present in DB"));
+            } else {
+                final User user = new User(id++, xmlUser.getValue(), xmlUser.getEmail(), UserFlag.valueOf(xmlUser.getFlag().value()), cityRef);
+                chunk.add(user);
+                if (chunk.size() == chunkSize) {
+                    addChunkFutures(result, chunk);
+                    chunk = new ArrayList<>(chunkSize);
+                    id = userDao.getSeqAndSkip(chunkSize);
+                }
             }
         }
         if (!chunk.isEmpty()) {
