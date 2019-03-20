@@ -3,7 +3,7 @@ package ru.javaops.masterjava.service.mail;
 import javax.jws.WebService;
 import java.util.List;
 
-@WebService
+@WebService(endpointInterface = "ru.javaops.masterjava.service.mail.MailService")
 public class MailServiceImpl implements MailService {
     @Override
     public void sendMail(List<Addressee> to, List<Addressee> cc, String subject, String body) {

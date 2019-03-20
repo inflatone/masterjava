@@ -11,7 +11,6 @@ import java.util.List;
  */
 @WebService
 public interface MailService {
-
     @WebMethod
     void sendMail(
             @WebParam(name = "to") List<Addressee> to,
