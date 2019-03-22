@@ -5,6 +5,7 @@ import lombok.val;
 import ru.javaops.masterjava.persist.DBIProvider;
 import ru.javaops.masterjava.persist.dao.UserDao;
 import ru.javaops.masterjava.persist.model.City;
+import ru.javaops.masterjava.persist.model.Group;
 import ru.javaops.masterjava.persist.model.User;
 import ru.javaops.masterjava.persist.model.type.UserFlag;
 import ru.javaops.masterjava.xml.schema.ObjectFactory;
@@ -24,11 +25,12 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import ru.javaops.masterjava.upload.PayloadProcessor.FailedEmails;
 
+import static ru.javaops.masterjava.upload.PayloadProcessor.jaxbParser;
+
 @Slf4j
 public class UserProcessor {
     private static final int NUMBER_THREADS = 4;
 
-    private static final JaxbParser jaxbParser = new JaxbParser(ObjectFactory.class);
     private static UserDao userDao = DBIProvider.getDao(UserDao.class);
 
     private ExecutorService executorService = Executors.newFixedThreadPool(NUMBER_THREADS);
@@ -37,10 +39,10 @@ public class UserProcessor {
      * return failed users chunks
      */
     public List<PayloadProcessor.FailedEmails> process(
-            final StaxStreamProcessor processor, Map<String, City> cities, int chunkSize
+            final StaxStreamProcessor processor, Map<String, Group> groups, Map<String, City> cities, int chunkSize
     ) throws XMLStreamException, JAXBException {
         List<PayloadProcessor.FailedEmails> failed = new ArrayList<>();
-        Map<String, Future<List<String>>> chunkFutures = createChunkFutures(processor, cities, failed, chunkSize);
+        Map<String, Future<List<String>>> chunkFutures = createChunkFutures(processor, groups, cities, failed, chunkSize);
 
         List<String> allAlreadyPresents = new ArrayList<>();
         chunkFutures.forEach((emailRange, future) -> {
@@ -60,7 +62,7 @@ public class UserProcessor {
     }
 
     private Map<String, Future<List<String>>> createChunkFutures(
-            final StaxStreamProcessor processor, Map<String, City> cities,
+            final StaxStreamProcessor processor, Map<String, Group> groups, Map<String, City> cities,
             List<PayloadProcessor.FailedEmails> failed, int chunkSize
     ) throws JAXBException, XMLStreamException {
         log.info("Start processing with chunkSize=" + chunkSize);
