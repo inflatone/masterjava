@@ -1,7 +1,7 @@
 package ru.javaops.masterjava.service.mail;
 
 import javax.jws.WebService;
-import java.util.List;
+import java.util.Set;
 
 @WebService(
         endpointInterface = "ru.javaops.masterjava.service.mail.MailService",
@@ -10,7 +10,7 @@ import java.util.List;
 )
 public class MailServiceImpl implements MailService {
     @Override
-    public void sendMail(List<Addressee> to, List<Addressee> cc, String subject, String body) {
-        MailSender.sendMail(to, cc, subject, body);
+    public void sendToGroup(Set<Addressee> to, Set<Addressee> cc, String subject, String body) {
+        MailSender.sendToGroup(to, cc, subject, body);
     }
 }

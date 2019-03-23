@@ -3,8 +3,7 @@ package ru.javaops.masterjava.service.mail;
 import javax.jws.WebMethod;
 import javax.jws.WebParam;
 import javax.jws.WebService;
-import javax.jws.soap.SOAPBinding;
-import java.util.List;
+import java.util.Set;
 
 /**
  * gkislin
@@ -17,9 +16,9 @@ import java.util.List;
         parameterStyle = SOAPBinding.ParameterStyle.WRAPPED)*/
 public interface MailService {
     @WebMethod
-    void sendMail(
-            @WebParam(name = "to") List<Addressee> to,
-            @WebParam(name = "cc") List<Addressee> cc,
+    void sendToGroup(
+            @WebParam(name = "to") Set<Addressee> to,
+            @WebParam(name = "cc") Set<Addressee> cc,
             @WebParam(name = "subject") String subject,
             @WebParam(name = "body") String body);
 }
