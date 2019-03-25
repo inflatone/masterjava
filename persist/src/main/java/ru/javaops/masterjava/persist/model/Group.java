@@ -14,8 +14,6 @@ public class Group extends BaseEntity {
     private String name;
     @NonNull
     private GroupType type;
-    @NonNull
     @Column("project_id")
     private int projectId;
-
 }
