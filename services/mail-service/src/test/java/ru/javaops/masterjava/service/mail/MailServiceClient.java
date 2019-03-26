@@ -15,9 +15,18 @@ public class MailServiceClient {
         );
 
         MailService mailService = service.getPort(MailService.class);
-        mailService.sendToGroup(
-                ImmutableSet.of(new Addressee("masterjava@javaops.ru", null)),
-                null, "Subject", "Body"
+        String state = mailService.sendToGroup(
+                ImmutableSet.of(new Addressee("sane4ever@ya.ru", null)),
+                null, "Group mail subject", "Group mail body"
         );
+        System.out.println("Group mail state: " + state);
+
+        GroupResult groupResult = mailService.sendBulk(
+                ImmutableSet.of(
+                        new Addressee("Мастер Java <sane4ever@ya.ru>"),
+                        new Addressee("Bad Email <bad_email.ru>")),
+                "Bulk mail subject", "Bulk mail body"
+        );
+        System.out.println("\nBulk mail groupResult:\n" + groupResult);
     }
 }

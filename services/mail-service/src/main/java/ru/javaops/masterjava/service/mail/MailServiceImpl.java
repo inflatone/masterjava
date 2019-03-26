@@ -10,8 +10,8 @@ import java.util.Set;
 )
 public class MailServiceImpl implements MailService {
     @Override
-    public void sendToGroup(Set<Addressee> to, Set<Addressee> cc, String subject, String body) {
-        MailSender.sendToGroup(to, cc, subject, body);
+    public String sendToGroup(Set<Addressee> to, Set<Addressee> cc, String subject, String body) {
+        return MailSender.sendToGroup(to, cc, subject, body);
     }
 
     @Override

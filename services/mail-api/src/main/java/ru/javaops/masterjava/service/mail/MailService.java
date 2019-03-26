@@ -12,7 +12,7 @@ import java.util.Set;
         parameterStyle = SOAPBinding.ParameterStyle.WRAPPED)*/
 public interface MailService {
     @WebMethod
-    void sendToGroup(
+    String sendToGroup(
             @WebParam(name = "to") Set<Addressee> to,
             @WebParam(name = "cc") Set<Addressee> cc,
             @WebParam(name = "subject") String subject,
