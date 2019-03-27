@@ -1,7 +1,8 @@
-package ru.javaops.masterjava.web;
+package ru.javaops.web;
 
 
 import com.typesafe.config.Config;
+import ru.javaops.masterjava.ExceptionType;
 import ru.javaops.masterjava.config.Configs;
 
 import javax.xml.namespace.QName;
@@ -23,6 +24,12 @@ public class WsClient<T> {
     public WsClient(URL wsdlUrl, QName qname, Class<T> serviceClass) {
         this.serviceClass = serviceClass;
         this.service = Service.create(wsdlUrl, qname);
+    }
+
+    public static WebStateException getWebStateException(Throwable t, ExceptionType type) {
+        return t instanceof WebStateException
+                ? (WebStateException) t
+                : new WebStateException(t, type);
     }
 
     public void init(String host, String endpointAddress) {
