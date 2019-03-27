@@ -1,4 +1,4 @@
-package ru.javaops.web;
+package ru.javaops.masterjava.web;
 
 //http://blog.idrsolutions.com/2013/10/web-services-exception-handling/
 
