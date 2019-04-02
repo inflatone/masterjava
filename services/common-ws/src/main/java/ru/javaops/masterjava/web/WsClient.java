@@ -8,6 +8,7 @@ import ru.javaops.masterjava.config.Configs;
 import javax.xml.namespace.QName;
 import javax.xml.ws.BindingProvider;
 import javax.xml.ws.Service;
+import javax.xml.ws.WebServiceFeature;
 import java.net.URL;
 
 public class WsClient<T> {
@@ -36,9 +37,10 @@ public class WsClient<T> {
         this.endpointAddress = HOSTS.getString(host) + endpointAddress;
     }
 
-    public T getPort() {
-        T port = service.getPort(serviceClass);
-        ((BindingProvider) port).getRequestContext().put(
+    //  Post is not thread-safe (http://stackoverflow.com/a/10601916/548473)
+    public T getPort(WebServiceFeature... features) {
+        T port = service.getPort(serviceClass, features);
+        ((BindingProvider)port).getRequestContext().put(
                 BindingProvider.ENDPOINT_ADDRESS_PROPERTY, endpointAddress
         );
         return port;
