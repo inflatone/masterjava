@@ -10,6 +10,7 @@ import javax.xml.ws.BindingProvider;
 import javax.xml.ws.Service;
 import javax.xml.ws.WebServiceFeature;
 import java.net.URL;
+import java.util.Map;
 
 public class WsClient<T> {
     private static Config HOSTS;
@@ -33,6 +34,12 @@ public class WsClient<T> {
                 : new WebStateException(t, type);
     }
 
+    public static <T> void setAuth(T port, String user, String password) {
+        Map<String, Object> requestContext = ((BindingProvider) port).getRequestContext();
+        requestContext.put(BindingProvider.USERNAME_PROPERTY, user);
+        requestContext.put(BindingProvider.PASSWORD_PROPERTY, password);
+    }
+
     public void init(String host, String endpointAddress) {
         this.endpointAddress = HOSTS.getString(host) + endpointAddress;
     }
@@ -40,7 +47,7 @@ public class WsClient<T> {
     //  Post is not thread-safe (http://stackoverflow.com/a/10601916/548473)
     public T getPort(WebServiceFeature... features) {
         T port = service.getPort(serviceClass, features);
-        ((BindingProvider)port).getRequestContext().put(
+        ((BindingProvider) port).getRequestContext().put(
                 BindingProvider.ENDPOINT_ADDRESS_PROPERTY, endpointAddress
         );
         return port;
