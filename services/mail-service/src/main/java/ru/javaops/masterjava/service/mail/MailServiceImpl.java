@@ -17,7 +17,7 @@ import java.util.Set;
 )
 //@StreamingAttachment(parseEagerly = true, memoryThreshold = 40000L)
 @MTOM
-@HandlerChain(file = "mailHandlers.xml")
+@HandlerChain(file = "mailWsHandlers.xml")
 public class MailServiceImpl implements MailService {
     @Resource
     private WebServiceContext wsContext;
