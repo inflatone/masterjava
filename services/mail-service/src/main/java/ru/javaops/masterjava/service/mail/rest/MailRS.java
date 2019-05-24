@@ -10,7 +10,7 @@ import ru.javaops.masterjava.service.mail.Attachment;
 import ru.javaops.masterjava.service.mail.GroupResult;
 import ru.javaops.masterjava.service.mail.MailServiceExecutor;
 import ru.javaops.masterjava.service.mail.MailWSClient;
-import ru.javaops.masterjava.service.mail.util.Attachments;
+import ru.javaops.masterjava.service.mail.util.MailUtils;
 import ru.javaops.masterjava.web.WebStateException;
 
 import javax.activation.DataHandler;
@@ -37,7 +37,7 @@ public class MailRS {
             @NotBlank @FormDataParam("body") String body,
             @FormDataParam("attach") FormDataBodyPart attachBodyPart
     ) throws WebStateException {
-        return MailServiceExecutor.sendBulk(MailWSClient.split(users), subject, body, prepareAttachments(attachBodyPart));
+        return MailServiceExecutor.sendBulk(MailUtils.split(users), subject, body, prepareAttachments(attachBodyPart));
     }
 
     private List<Attachment> prepareAttachments(FormDataBodyPart attachBodyPart) {
@@ -48,6 +48,6 @@ public class MailRS {
         // UTF-8 encoding workaround: https://java.net/jira/browse/JERSEY-3032
         String utf8Name = new String(attachName.getBytes(Charsets.ISO_8859_1), Charsets.UTF_8);
         BodyPartEntity entity = ((BodyPartEntity) attachBodyPart.getEntity());
-        return ImmutableList.of(new Attachment(utf8Name, new DataHandler((Attachments.ProxyDataSource) entity::getInputStream)));
+        return ImmutableList.of(new Attachment(utf8Name, new DataHandler((MailUtils.ProxyDataSource) entity::getInputStream)));
     }
 }

@@ -36,9 +36,9 @@
     <p><textarea id="body" placeholder="mail body" cols="75" rows="5"></textarea><br/></p>
     <p><input id="attach" type="file"></p>
     <p>
-        <input type="radio" name="transport" onchange="setTransport('SOAP');" checked>SOAP<br>
-        <input type="radio" name="transport" onchange="setTransport('REST');">REST<br>
-        <input type="radio" name="transport" onchange="setTransport('JMS');">JMS<br>
+        <input type="radio" name="transport" onchange="setUrl('sendSoap');" checked>SOAP<br>
+        <input type="radio" name="transport" onchange="setUrl('/mail/rest/send');">REST<br>
+        <input type="radio" name="transport" onchange="setUrl('sendJms');">JMS<br>
     </p>
 
     <p>
@@ -48,10 +48,10 @@
 </section>
 
 <script type="text/javascript">
-    var transport = "SOAP"; //default
+    var url = "sendSoap"; //default
 
-    function setTransport(value) {
-        transport = value;
+    function setUrl(value) {
+        url = value;
     }
 
     function send() {
@@ -64,32 +64,21 @@
             $('$result').html("Addresses are not selected");
             return;
         }
-
-        var param;
-        if (transport === "SOAP" || transport === "REST") {
-            // https://stackoverflow.com/a/5976031/548473
-            var data = new FormData();
-            data.append('users', users);
-            data.append('subject', $("#subject").val());
-            data.append('body', $("#body").val());
-            var attach = $('#attach')[0].files[0];
-            if (attach) data.append('attach', attach);
-            param = {
-                url: transport === "REST" ? "/mail/rest/send" : "sendSoap",
-                data: data,
-                contextType: false,
-                processData: false
-            };
-        } else if (transport === "JMS") {
-            param = {
-                url: transport === "sendJms",
-                data: "users=" + users + "&subject=" + $('#subject').val() + "&body=" + $('#body').val(),
-                contentType: "application/x-www-form-urlencoded"
-            };
-        }
+        // https://stackoverflow.com/a/5976031/548473
+        var data = new FormData();
+        data.append('users', users);
+        data.append('subject', $("#subject").val());
+        data.append('body', $("#body").val());
+        var attach = $('#attach')[0].files[0];
+        if (attach) data.append('attach', attach);
 
         //https://stackoverflow.com/a/22213543/548473
-        $.post(param).done(function (result) {
+        $.post({
+            url: url,
+            data: data,
+            contentType: false,
+            processData: false
+        }).done(function (result) {
             if (typeof result === "object") {
                 result = JSON.stringify(result);
             }
