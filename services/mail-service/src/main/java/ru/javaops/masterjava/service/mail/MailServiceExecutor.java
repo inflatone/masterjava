@@ -80,7 +80,7 @@ public class MailServiceExecutor {
                     try {
                         MailSender.sendTo(
                                 a, mailObject.getSubject(), mailObject.getBody(),
-                                ImmutableList.of(MailUtils.getAttachment(mailObject.getAttachName(), mailObject.getAttachData()))
+                                MailUtils.getAttachments(mailObject.getAttachments())
                         );
                     } catch (WebStateException e) {
                         // already logged

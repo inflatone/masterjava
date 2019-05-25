@@ -14,7 +14,11 @@ import ru.javaops.masterjava.service.mail.Attachment;
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
 import java.io.*;
+import java.util.AbstractMap;
+import java.util.AbstractMap.SimpleImmutableEntry;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class MailUtils {
 
@@ -31,16 +35,12 @@ public class MailUtils {
         private String subject;
         @NotNull
         private String body;
-        private String attachName;
-        private byte[] attachData;
+        //  http://stackoverflow.com/questions/521171/a-java-collection-of-value-pairs-tuples
+        private List<SimpleImmutableEntry<String, byte[]>> attachments;
     }
 
-    public static MailObject getMailObject(String users, String subject, String body, String name, InputStream in) {
-        try {
-            return new MailObject(users, subject, body, name, in == null ? null : IOUtils.toByteArray(in));
-        } catch (IOException e) {
-            throw new IllegalStateException(e);
-        }
+    public static List<Attachment> getAttachments(List<SimpleImmutableEntry<String, byte[]>> attachments) {
+        return attachments.stream().map(a -> getAttachment(a.getKey(), a.getValue())).collect(Collectors.toList());
     }
 
     public static Attachment getAttachment(String name, byte[] attachData) {
