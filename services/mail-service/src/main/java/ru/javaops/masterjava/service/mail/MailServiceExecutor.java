@@ -1,5 +1,6 @@
 package ru.javaops.masterjava.service.mail;
 
+import akka.dispatch.Futures;
 import com.google.common.collect.ImmutableList;
 import lombok.extern.slf4j.Slf4j;
 import one.util.streamex.StreamEx;
@@ -8,6 +9,7 @@ import ru.javaops.masterjava.service.mail.util.MailUtils;
 import ru.javaops.masterjava.service.mail.util.MailUtils.MailObject;
 import ru.javaops.masterjava.web.WebStateException;
 import ru.javaops.masterjava.web.WsClient;
+import scala.concurrent.ExecutionContext;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -71,6 +73,14 @@ public class MailServiceExecutor {
                 }
             }
         }.call();
+    }
+
+    public static scala.concurrent.Future<GroupResult> sendAsyncWithReply(MailObject mailObject, ExecutionContext executionContext) {
+        // http://doc.akka.io/docs/akka/current/java/futures.html
+        return Futures.future(
+                () -> sendBulk(MailUtils.split(mailObject.getUsers()), mailObject.getSubject(), mailObject.getBody(), MailUtils.getAttachments(mailObject.getAttachments())),
+                executionContext
+        );
     }
 
     public static void sendAsync(MailObject mailObject) {
