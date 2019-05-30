@@ -1,13 +1,16 @@
 package ru.javaops.masterjava.webapp.akka;
 
 import lombok.extern.slf4j.Slf4j;
+import ru.javaops.masterjava.persist.model.Group;
 import ru.javaops.masterjava.service.mail.GroupResult;
 import ru.javaops.masterjava.service.mail.MailRemoteService;
 import ru.javaops.masterjava.service.mail.util.MailUtils.MailObject;
+import ru.javaops.masterjava.util.Exceptions;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
 
+import javax.servlet.AsyncContext;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.MultipartConfig;
@@ -18,8 +21,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
-import static ru.javaops.masterjava.webapp.WebUtil.createMailObject;
-import static ru.javaops.masterjava.webapp.WebUtil.doAndWriteResponse;
+import static ru.javaops.masterjava.webapp.WebUtil.*;
 import static ru.javaops.masterjava.webapp.akka.AkkaWebappListener.akkaActivator;
 
 @Slf4j
@@ -37,6 +39,20 @@ public class AkkaTypedSendServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         req.setCharacterEncoding("UTF-8");
+        // https://dzone.com/articles/limited-usefulness
+        doAsync(resp, () -> {
+            MailObject mailObject = createMailObject(req);
+            final AsyncContext aCtx = req.startAsync();
+            aCtx.start(
+                    Exceptions.wrap(() -> {
+                        doAndWriteResponse((HttpServletResponse) aCtx.getResponse(), () -> sendAkka(mailObject));
+                        aCtx.complete();
+                    })
+            );
+        });
+
+
+
         doAndWriteResponse(resp, () -> sendAkka(createMailObject(req)));
     }
 
@@ -46,6 +62,4 @@ public class AkkaTypedSendServlet extends HttpServlet {
         GroupResult groupResult = Await.result(future, Duration.create(10, TimeUnit.SECONDS));
         return groupResult.toString();
     }
-
-
 }
