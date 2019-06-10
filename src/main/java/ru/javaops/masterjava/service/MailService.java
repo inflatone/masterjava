@@ -1,8 +1,10 @@
 package ru.javaops.masterjava.service;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.*;
+import java.util.stream.Collectors;
 
 public class MailService {
     private static final String OK = "OK";
@@ -11,8 +13,71 @@ public class MailService {
     private static final String INTERRUPTED_BY_TIMEOUT = "+++ Interrupted by timeout";
     private static final String INTERRUPTED_EXCEPTION = "+++ InterruptedException";
 
+    private final ExecutorService mailExecutor = Executors.newFixedThreadPool(8);
+
     public GroupResult sendToList(final String template, final Set<String> emails) throws Exception {
-        return new GroupResult(0, Collections.emptyList(), null);
+        final CompletionService<MailResult> competitionService = new ExecutorCompletionService<>(mailExecutor);
+        List<Future<MailResult>> futures = emails.stream()
+                .map(email -> competitionService.submit(() -> sendToUser(template, email)))
+                .collect(Collectors.toList());
+        return new Callable<GroupResult>() {
+            private int success = 0;
+            private List<MailResult> failed = new ArrayList<>();
+
+            @Override
+            public GroupResult call() throws Exception {
+                while (!futures.isEmpty()) {
+                    try {
+                        Future<MailResult> future = competitionService.poll(10, TimeUnit.SECONDS);
+                        if (future == null) {
+                            return cancelWithFail(INTERRUPTED_BY_TIMEOUT);
+                        }
+                        futures.remove(future);
+                        MailResult result = future.get();
+                        if (result.isOk()) {
+                            success++;
+                        } else {
+                            failed.add(result);
+                            if (failed.size() >= 5) {
+                                return cancelWithFail(INTERRUPTED_BY_FAULTS_NUMBER);
+                            }
+                        }
+                    } catch (ExecutionException e) {
+                        return cancelWithFail(e.getCause().toString());
+                    } catch (InterruptedException e) {
+                        return cancelWithFail(INTERRUPTED_EXCEPTION);
+                    }
+                }
+                /*
+                for (Future<MailResult> future : futures) {
+                    MailResult result;
+                    try {
+                        result = future.get(10, TimeUnit.SECONDS);
+                    } catch (InterruptedException e) {
+                        return cancelWithFail(INTERRUPTED_EXCEPTION);
+                    } catch (ExecutionException e) {
+                        return cancelWithFail(e.getCause().toString());
+                    } catch (TimeoutException e) {
+                        return cancelWithFail(INTERRUPTED_BY_TIMEOUT);
+                    }
+                    if (result.isOk()) {
+                        success++;
+                    } else {
+                        failed.add(result);
+                        if (failed.size() >= 5) {
+                            return cancelWithFail(INTERRUPTED_BY_FAULTS_NUMBER);
+                        }
+                    }
+                }
+                */
+                return new GroupResult(success, failed, null);
+            }
+
+            private GroupResult cancelWithFail(String cause) {
+                futures.forEach(f -> f.cancel(true));
+                return new GroupResult(success, failed, cause);
+            }
+        }.call();
     }
 
 
