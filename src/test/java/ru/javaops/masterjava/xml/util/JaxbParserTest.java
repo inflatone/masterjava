@@ -7,10 +7,7 @@ import ru.javaops.masterjava.xml.schema.ObjectFactory;
 import ru.javaops.masterjava.xml.schema.Payload;
 
 import javax.xml.bind.JAXBElement;
-import javax.xml.bind.JAXBException;
 import javax.xml.namespace.QName;
-
-import static org.junit.Assert.*;
 
 public class JaxbParserTest {
     private static final JaxbParser PARSER = new JaxbParser(ObjectFactory.class);
