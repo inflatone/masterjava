@@ -73,30 +73,24 @@ public class MainXml {
             StaxStreamProcessor processor = new StaxStreamProcessor(in);
             final Set<String> groupNames = new HashSet<>();
 
-            projects:
-            while (processor.doUntil(XMLEvent.START_ELEMENT, "Project")) {
+            while (processor.startElement("Project", "Projects")) {
                 if (projectName.equals(processor.getAttribute("name"))) {
-                    String element;
-                    while ((element = processor.doUntilAny(XMLEvent.START_ELEMENT, "Project", "Group", "Users")) != null) {
-                        if (!element.equals("Group")) {
-                            break projects;
-                        }
+                    while (processor.startElement("Group", "Project")) {
                         groupNames.add(processor.getAttribute("name"));
                     }
+                    break;
                 }
             }
             if (groupNames.isEmpty()) {
                 throw new IllegalArgumentException("Invalid " + projectName + " or no groups");
             }
 
+            JaxbParser parser = new JaxbParser(User.class);
             final Set<User> users = new TreeSet<>(USER_COMPARATOR);
             while(processor.doUntil(XMLEvent.START_ELEMENT, "User")) {
                 String groupRefs = processor.getAttribute("groupRefs");
                 if (!Collections.disjoint(groupNames, Splitter.on(' ').splitToList(nullToEmpty(groupRefs)))) {
-                    User user = new User();
-                    user.setEmail(processor.getAttribute("email"));
-                    user.setValue(processor.getText());
-                    users.add(user);
+                    users.add(parser.unmarshal(processor.getReader(), User.class));
                 }
             }
             return users;
