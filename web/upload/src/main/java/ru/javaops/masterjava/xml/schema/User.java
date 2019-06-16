@@ -37,7 +37,7 @@ import javax.xml.bind.annotation.XmlValue;
 @XmlType(name = "", propOrder = {
     "value"
 })
-@XmlRootElement(name = "User", namespace = "http://javaops.ru")
+@XmlRootElement(name = "Person", namespace = "http://javaops.ru")
 public class User {
 
     @XmlValue

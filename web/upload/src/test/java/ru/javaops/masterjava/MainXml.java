@@ -93,7 +93,7 @@ public class MainXml {
 
             JaxbParser parser = new JaxbParser(User.class);
             final Set<User> users = new TreeSet<>(USER_COMPARATOR);
-            while (processor.doUntil(XMLEvent.START_ELEMENT, "User")) {
+            while (processor.doUntil(XMLEvent.START_ELEMENT, "Person")) {
                 String groupRefs = processor.getAttribute("groupRefs");
                 if (!Collections.disjoint(groupNames, Splitter.on(' ').splitToList(nullToEmpty(groupRefs)))) {
                     users.add(parser.unmarshal(processor.getReader(), User.class));
