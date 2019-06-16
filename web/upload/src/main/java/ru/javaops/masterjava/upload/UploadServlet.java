@@ -1,23 +1,23 @@
 package ru.javaops.masterjava.upload;
 
-import org.apache.commons.fileupload.FileItemIterator;
-import org.apache.commons.fileupload.FileItemStream;
-import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.thymeleaf.context.WebContext;
 import ru.javaops.masterjava.model.Person;
 
 import javax.servlet.ServletException;
+import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.Part;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
 import static ru.javaops.masterjava.common.web.ThymeleafListener.engine;
 
-@WebServlet("/")
+@WebServlet(urlPatterns = "/", loadOnStartup = 1)
+@MultipartConfig(fileSizeThreshold = 1024 * 1024 * 10)
 public class UploadServlet extends HttpServlet {
     private final PersonProcessor personProcessor = new PersonProcessor();
 
@@ -29,21 +29,17 @@ public class UploadServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        final ServletFileUpload upload = new ServletFileUpload();
         final WebContext webContext = new WebContext(req, resp, req.getServletContext(), req.getLocale());
         try {
-//            https://commons.apache.org/proper/commons-fileupload/streaming.html
-            final FileItemIterator iterator = upload.getItemIterator(req);
-            while (iterator.hasNext()) {
-                FileItemStream itemStream = iterator.next();
-                if (!itemStream.isFormField()) {
-                    try (InputStream in = itemStream.openStream()) {
-                        List<Person> persons = personProcessor.process(in);
-                        webContext.setVariable("persons", persons);
-                        engine.process("result", webContext, resp.getWriter());
-                    }
-                    break;  //expect that it's only one file
-                }
+//            http://docs.oracle.com/javaee/6/tutorial/doc/glraq.html
+            Part filePart = req.getPart("fileToUpload");
+            if (filePart.getSize() == 0) {
+                throw new IllegalStateException("File to upload have not been selected");
+            }
+            try (InputStream in = filePart.getInputStream()) {
+                List<Person> persons = personProcessor.process(in);
+                webContext.setVariable("persons", persons);
+                engine.process("result", webContext, resp.getWriter());
             }
 
         } catch (Exception e) {
