@@ -19,11 +19,15 @@ public class JaxbMarshaller {
         marshaller.setProperty(Marshaller.JAXB_FRAGMENT, true);
     }
 
-    public void setProperty(String property, Object value) throws PropertyException {
-        marshaller.setProperty(property, value);
+    public void setProperty(String property, Object value) {
+        try {
+            marshaller.setProperty(property, value);
+        } catch (PropertyException e) {
+            throw new IllegalArgumentException(e);
+        }
     }
 
-    public synchronized void setSchema(Schema schema) {
+    public void setSchema(Schema schema) {
         marshaller.setSchema(schema);
     }
 
@@ -33,7 +37,7 @@ public class JaxbMarshaller {
         return writer.toString();
     }
 
-    public synchronized void marshal(Object instance, Writer writer) throws JAXBException {
+    public void marshal(Object instance, Writer writer) throws JAXBException {
         marshaller.marshal(instance, writer);
     }
 }

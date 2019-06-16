@@ -47,7 +47,7 @@ import javax.xml.bind.annotation.XmlType;
  *             &lt;complexContent>
  *               &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *                 &lt;sequence maxOccurs="unbounded" minOccurs="0">
- *                   &lt;element ref="{http://javaops.ru}Person"/>
+ *                   &lt;element ref="{http://javaops.ru}User"/>
  *                 &lt;/sequence>
  *               &lt;/restriction>
  *             &lt;/complexContent>
@@ -280,7 +280,7 @@ public class Payload {
      *   &lt;complexContent>
      *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
      *       &lt;sequence maxOccurs="unbounded" minOccurs="0">
-     *         &lt;element ref="{http://javaops.ru}Person"/>
+     *         &lt;element ref="{http://javaops.ru}User"/>
      *       &lt;/sequence>
      *     &lt;/restriction>
      *   &lt;/complexContent>
@@ -295,7 +295,7 @@ public class Payload {
     })
     public static class Users {
 
-        @XmlElement(name = "Person", namespace = "http://javaops.ru")
+        @XmlElement(name = "User", namespace = "http://javaops.ru")
         protected List<User> user;
 
         /**

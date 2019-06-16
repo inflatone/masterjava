@@ -8,10 +8,7 @@ import ru.javaops.masterjava.xml.schema.ObjectFactory;
 import ru.javaops.masterjava.xml.schema.Payload;
 import ru.javaops.masterjava.xml.schema.Project;
 import ru.javaops.masterjava.xml.schema.User;
-import ru.javaops.masterjava.xml.util.JaxbParser;
-import ru.javaops.masterjava.xml.util.Schemas;
-import ru.javaops.masterjava.xml.util.StaxStreamProcessor;
-import ru.javaops.masterjava.xml.util.XsltProcessor;
+import ru.javaops.masterjava.xml.util.*;
 
 import javax.xml.stream.events.XMLEvent;
 import java.io.InputStream;
@@ -20,7 +17,6 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static com.google.common.base.Strings.nullToEmpty;
 import static j2html.TagCreator.*;
@@ -60,9 +56,10 @@ public class MainXml {
     private static Set<User> parseByJaxb(String projectName, URL payloadUrl) throws Exception {
         JaxbParser parser = new JaxbParser(ObjectFactory.class);
         parser.setSchema(Schemas.ofClasspath("payload.xsd"));
+        JaxbUnmarshaller unmarshaller = parser.createUnmarshaller();
         Payload payload;
         try (InputStream in = payloadUrl.openStream()) {
-            payload = parser.unmarshal(in);
+            payload = unmarshaller.unmarshal(in, Payload.class);
         }
         Project project = StreamEx.of(payload.getProjects().getProject())
                 .filter(p -> p.getName().equals(projectName))
@@ -91,12 +88,13 @@ public class MainXml {
                 throw new IllegalArgumentException("Invalid " + projectName + " or no groups");
             }
 
-            JaxbParser parser = new JaxbParser(User.class);
+            JaxbParser parser = new JaxbParser(ObjectFactory.class);
+            JaxbUnmarshaller unmarshaller = parser.createUnmarshaller();
             final Set<User> users = new TreeSet<>(USER_COMPARATOR);
             while (processor.doUntil(XMLEvent.START_ELEMENT, "Person")) {
                 String groupRefs = processor.getAttribute("groupRefs");
                 if (!Collections.disjoint(groupNames, Splitter.on(' ').splitToList(nullToEmpty(groupRefs)))) {
-                    users.add(parser.unmarshal(processor.getReader(), User.class));
+                    users.add(unmarshaller.unmarshal(processor.getReader(), User.class));
                 }
             }
             return users;
