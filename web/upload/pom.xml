@@ -16,6 +16,10 @@
     <version>1.0-SNAPSHOT</version>
     <name>Upload</name>
 
+    <properties>
+        <jaxb.api.version>2.3.0</jaxb.api.version>
+    </properties>
+
     <build>
         <finalName>upload</finalName>
     </build>

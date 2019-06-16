@@ -15,7 +15,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-        <jaxb.api.version>2.3.0</jaxb.api.version>
+        <dependency.locations.enabled>false</dependency.locations.enabled>
     </properties>
 
     <build>
