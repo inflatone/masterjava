@@ -19,8 +19,6 @@
         <finalName>masterjava</finalName>
         <defaultGoal>install</defaultGoal>
         <plugins>
-
-
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
@@ -57,7 +55,6 @@
                     </execution>
                 </executions>
             </plugin>
-
         </plugins>
     </build>
 
@@ -65,12 +62,12 @@
         <dependency>
             <groupId>org.openjdk.jmh</groupId>
             <artifactId>jmh-core</artifactId>
-            <version>RELEASE</version>
+            <version>1.21</version>
         </dependency>
         <dependency>
             <groupId>org.openjdk.jmh</groupId>
             <artifactId>jmh-generator-annprocess</artifactId>
-            <version>RELEASE</version>
+            <version>1.21</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>
