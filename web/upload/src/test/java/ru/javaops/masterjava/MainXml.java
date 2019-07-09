@@ -91,7 +91,7 @@ public class MainXml {
             JaxbParser parser = new JaxbParser(ObjectFactory.class);
             JaxbUnmarshaller unmarshaller = parser.createUnmarshaller();
             final Set<User> users = new TreeSet<>(USER_COMPARATOR);
-            while (processor.doUntil(XMLEvent.START_ELEMENT, "Person")) {
+            while (processor.doUntil(XMLEvent.START_ELEMENT, "User")) {
                 String groupRefs = processor.getAttribute("groupRefs");
                 if (!Collections.disjoint(groupNames, Splitter.on(' ').splitToList(nullToEmpty(groupRefs)))) {
                     users.add(unmarshaller.unmarshal(processor.getReader(), User.class));

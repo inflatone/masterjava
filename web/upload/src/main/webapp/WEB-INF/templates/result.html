@@ -15,11 +15,11 @@
     </tr>
     </thead>
     <tbody>
-    <!--/*@thymesVar id="persons" type="java.util.List<ru.javaops.masterjava.model.Person>"*/-->
-    <tr th:each="person : ${persons}">
-        <td th:text="${person.fullName}"></td>
-        <td th:text="${person.email}"></td>
-        <td th:text="${person.flag}"></td>
+    <!--/*@thymesVar id="users" type="java.util.List<ru.masterjava.persist.model.User>"*/-->
+    <tr th:each="user : ${users}">
+        <td th:text="${user.fullName}"></td>
+        <td th:text="${user.email}"></td>
+        <td th:text="${user.flag}"></td>
     </tr>
     </tbody>
 </table>
