@@ -4,6 +4,8 @@ import ru.javaops.masterjava.xml.schema.ObjectFactory;
 import ru.javaops.masterjava.xml.util.JaxbParser;
 import ru.javaops.masterjava.xml.util.JaxbUnmarshaller;
 import ru.javaops.masterjava.xml.util.StaxStreamProcessor;
+import ru.masterjava.persist.DBIProvider;
+import ru.masterjava.persist.dao.UserDao;
 import ru.masterjava.persist.model.User;
 import ru.masterjava.persist.model.UserFlag;
 
@@ -16,8 +18,9 @@ import java.util.List;
 
 public class UserProcessor {
     private static final JaxbParser jaxbParser = new JaxbParser(ObjectFactory.class);
+    private static UserDao userDao = DBIProvider.getDao(UserDao.class);
 
-    public List<User> process(final InputStream in) throws XMLStreamException, JAXBException {
+    public List<User> process(final InputStream in, int chunkSize) throws XMLStreamException, JAXBException {
         final StaxStreamProcessor processor = new StaxStreamProcessor(in);
         List<User> users = new ArrayList<>();
         JaxbUnmarshaller unmarshaller = jaxbParser.createUnmarshaller();
@@ -26,6 +29,7 @@ public class UserProcessor {
             final User person = new User(user.getValue(), user.getEmail(), UserFlag.valueOf(user.getFlag().value()));
             users.add(person);
         }
+        userDao.insertBatch(users, chunkSize);
         return users;
     }
 }
