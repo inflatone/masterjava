@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.thymeleaf.context.WebContext;
-import ru.masterjava.persist.model.User;
+import ru.javaops.masterjava.upload.UserProcessor.FailedChunk;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.MultipartConfig;
@@ -45,10 +45,10 @@ public class UploadServlet extends HttpServlet {
             } else {
                 Part filePart = req.getPart("fileToUpload");
                 try (InputStream in = filePart.getInputStream()) {
-                    List<User> presented = userProcessor.process(in, chunkSize);
-                    log.info("Already present ib DB " + presented.size() + " users");
+                    List<FailedChunk> failed = userProcessor.process(in, chunkSize);
+                    log.info("Failed users: " + failed);
                     final WebContext webCtx = new WebContext(req, resp, req.getServletContext(), req.getLocale(),
-                            ImmutableMap.of("users", presented)
+                            ImmutableMap.of("users", failed)
                     );
                     engine.process("result", webCtx, resp.getWriter());
                     return;
