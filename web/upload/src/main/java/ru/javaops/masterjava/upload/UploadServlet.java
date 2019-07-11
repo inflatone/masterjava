@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.thymeleaf.context.WebContext;
-import ru.javaops.masterjava.upload.UserProcessor.FailedChunk;
+import ru.javaops.masterjava.upload.UserProcessor.FailedEmails;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.MultipartConfig;
@@ -45,7 +45,7 @@ public class UploadServlet extends HttpServlet {
             } else {
                 Part filePart = req.getPart("fileToUpload");
                 try (InputStream in = filePart.getInputStream()) {
-                    List<FailedChunk> failed = userProcessor.process(in, chunkSize);
+                    List<FailedEmails> failed = userProcessor.process(in, chunkSize);
                     log.info("Failed users: " + failed);
                     final WebContext webCtx = new WebContext(req, resp, req.getServletContext(), req.getLocale(),
                             ImmutableMap.of("users", failed)
