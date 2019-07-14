@@ -1,10 +1,10 @@
 package ru.javaops.masterjava.upload;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import ru.javaops.masterjava.xml.schema.ObjectFactory;
 import ru.javaops.masterjava.xml.util.JaxbParser;
-import ru.javaops.masterjava.xml.util.JaxbUnmarshaller;
 import ru.javaops.masterjava.xml.util.StaxStreamProcessor;
 import ru.masterjava.persist.DBIProvider;
 import ru.masterjava.persist.dao.UserDao;
@@ -24,8 +24,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+@Slf4j
 public class UserProcessor {
-    private static final Logger log = LoggerFactory.getLogger(UserProcessor.class);
     private static final int NUMBER_THREADS = 4;
 
     private static final JaxbParser jaxbParser = new JaxbParser(ObjectFactory.class);
@@ -33,14 +33,10 @@ public class UserProcessor {
 
     private ExecutorService executor = Executors.newFixedThreadPool(NUMBER_THREADS);
 
+    @AllArgsConstructor
     public static class FailedEmails {
         String emailOrRange;
         String reason;
-
-        FailedEmails(String emailOrRange, String reason) {
-            this.emailOrRange = emailOrRange;
-            this.reason = reason;
-        }
 
         @Override
         public String toString() {
@@ -56,8 +52,8 @@ public class UserProcessor {
         Map<String, Future<List<String>>> chunkFutures = new LinkedHashMap<>(); // ordered map (emailRange -> chunk future)
         int id = userDao.getSeqAndSkip(chunkSize);
         List<User> chunk = new ArrayList<>(chunkSize);
-        final StaxStreamProcessor processor = new StaxStreamProcessor(in);
-        final JaxbUnmarshaller unmarshaller = jaxbParser.createUnmarshaller();
+        val processor = new StaxStreamProcessor(in);
+        val unmarshaller = jaxbParser.createUnmarshaller();
 
         while (processor.doUntil(XMLEvent.START_ELEMENT, "User")) {
             ru.javaops.masterjava.xml.schema.User xmlUser = unmarshaller.unmarshal(processor.getReader(), ru.javaops.masterjava.xml.schema.User.class);
