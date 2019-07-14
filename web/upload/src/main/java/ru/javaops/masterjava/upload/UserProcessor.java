@@ -9,7 +9,7 @@ import ru.javaops.masterjava.xml.util.StaxStreamProcessor;
 import ru.masterjava.persist.DBIProvider;
 import ru.masterjava.persist.dao.UserDao;
 import ru.masterjava.persist.model.User;
-import ru.masterjava.persist.model.UserFlag;
+import ru.masterjava.persist.model.type.UserFlag;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.stream.XMLStreamException;
@@ -57,7 +57,7 @@ public class UserProcessor {
 
         while (processor.doUntil(XMLEvent.START_ELEMENT, "User")) {
             ru.javaops.masterjava.xml.schema.User xmlUser = unmarshaller.unmarshal(processor.getReader(), ru.javaops.masterjava.xml.schema.User.class);
-            final User user = new User(id++, xmlUser.getValue(), xmlUser.getEmail(), UserFlag.valueOf(xmlUser.getFlag().value()));
+            final User user = new User(id++, xmlUser.getValue(), xmlUser.getEmail(), UserFlag.valueOf(xmlUser.getFlag().value()), null);
             chunk.add(user);
             if (chunk.size() == chunkSize) {
                 addChunkFutures(chunkFutures, chunk);
