@@ -1,12 +1,15 @@
 package ru.masterjava.persist.dao;
 
+import com.bertoncelj.jdbi.entitymapper.EntityMapperFactory;
 import one.util.streamex.StreamEx;
 import org.skife.jdbi.v2.sqlobject.*;
+import org.skife.jdbi.v2.sqlobject.customizers.RegisterMapperFactory;
 import ru.masterjava.persist.model.UserGroup;
 
 import java.util.List;
 import java.util.Set;
 
+@RegisterMapperFactory(EntityMapperFactory.class)
 public abstract class UserGroupDao implements AbstractDao {
     @Override
     @SqlUpdate("TRUNCATE user_group CASCADE")

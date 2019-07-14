@@ -46,7 +46,7 @@ public abstract class UserDao implements AbstractDao {
 
     //   http://stackoverflow.com/questions/13223820/postgresql-delete-all-content
     @Override
-    @SqlUpdate("TRUNCATE users")
+    @SqlUpdate("TRUNCATE users CASCADE ")
     public abstract void clean();
 
     // https://habrahabr.ru/post/264281/
