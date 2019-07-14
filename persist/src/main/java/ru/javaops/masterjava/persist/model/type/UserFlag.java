@@ -1,4 +1,4 @@
-package ru.masterjava.persist.model.type;
+package ru.javaops.masterjava.persist.model.type;
 
 public enum UserFlag {
     active,

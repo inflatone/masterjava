@@ -1,9 +1,8 @@
 package ru.javaops.masterjava.persist;
 
 import com.google.common.collect.ImmutableMap;
-import ru.masterjava.persist.DBIProvider;
-import ru.masterjava.persist.dao.ProjectDao;
-import ru.masterjava.persist.model.Project;
+import ru.javaops.masterjava.persist.dao.ProjectDao;
+import ru.javaops.masterjava.persist.model.Project;
 
 import java.util.Map;
 

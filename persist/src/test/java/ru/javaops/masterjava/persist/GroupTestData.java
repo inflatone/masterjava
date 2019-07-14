@@ -1,16 +1,15 @@
 package ru.javaops.masterjava.persist;
 
 import com.google.common.collect.ImmutableMap;
-import ru.masterjava.persist.DBIProvider;
-import ru.masterjava.persist.dao.GroupDao;
-import ru.masterjava.persist.model.Group;
+import ru.javaops.masterjava.persist.dao.GroupDao;
+import ru.javaops.masterjava.persist.model.Group;
 
 import java.util.Map;
 
 import static ru.javaops.masterjava.persist.ProjectTestData.MASTERJAVA_ID;
 import static ru.javaops.masterjava.persist.ProjectTestData.TOPJAVA_ID;
-import static ru.masterjava.persist.model.type.GroupType.CURRENT;
-import static ru.masterjava.persist.model.type.GroupType.FINISHED;
+import static ru.javaops.masterjava.persist.model.type.GroupType.CURRENT;
+import static ru.javaops.masterjava.persist.model.type.GroupType.FINISHED;
 
 public class GroupTestData {
     public static Group TOPJAVA_06;

@@ -1,10 +1,10 @@
-package ru.masterjava.persist.dao;
+package ru.javaops.masterjava.persist.dao;
 
 import com.bertoncelj.jdbi.entitymapper.EntityMapperFactory;
 import one.util.streamex.StreamEx;
 import org.skife.jdbi.v2.sqlobject.*;
 import org.skife.jdbi.v2.sqlobject.customizers.RegisterMapperFactory;
-import ru.masterjava.persist.model.UserGroup;
+import ru.javaops.masterjava.persist.model.UserGroup;
 
 import java.util.List;
 import java.util.Set;

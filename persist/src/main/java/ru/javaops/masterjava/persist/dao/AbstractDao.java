@@ -1,4 +1,4 @@
-package ru.masterjava.persist.dao;
+package ru.javaops.masterjava.persist.dao;
 
 
 public interface AbstractDao {

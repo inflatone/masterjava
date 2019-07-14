@@ -4,8 +4,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import ru.javaops.masterjava.persist.UserTestData;
-import ru.masterjava.persist.dao.UserDao;
-import ru.masterjava.persist.model.User;
+import ru.javaops.masterjava.persist.model.User;
 
 import java.util.List;
 

@@ -1,15 +1,14 @@
 package ru.javaops.masterjava.persist;
 
-import ru.masterjava.persist.DBIProvider;
-import ru.masterjava.persist.dao.UserGroupDao;
-import ru.masterjava.persist.model.UserGroup;
+import ru.javaops.masterjava.persist.dao.UserGroupDao;
+import ru.javaops.masterjava.persist.model.UserGroup;
 
 import java.util.List;
 import java.util.Set;
 
 import static ru.javaops.masterjava.persist.GroupTestData.*;
 import static ru.javaops.masterjava.persist.UserTestData.*;
-import static ru.masterjava.persist.dao.UserGroupDao.*;
+import static ru.javaops.masterjava.persist.dao.UserGroupDao.toUserGroups;
 
 public class UserGroupTestData {
     public static List<UserGroup> USER_GROUPS;

@@ -1,10 +1,10 @@
-package ru.masterjava.persist;
+package ru.javaops.masterjava.persist;
 
 import lombok.extern.slf4j.Slf4j;
 import org.skife.jdbi.v2.DBI;
 import org.skife.jdbi.v2.logging.SLF4JLog;
 import org.skife.jdbi.v2.tweak.ConnectionFactory;
-import ru.masterjava.persist.dao.AbstractDao;
+import ru.javaops.masterjava.persist.dao.AbstractDao;
 
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
