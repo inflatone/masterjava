@@ -3,7 +3,7 @@ package ru.javaops.masterjava.upload;
 import com.google.common.collect.ImmutableMap;
 import lombok.extern.slf4j.Slf4j;
 import org.thymeleaf.context.WebContext;
-import ru.javaops.masterjava.upload.UserProcessor.FailedEmails;
+import ru.javaops.masterjava.upload.PayloadProcessor.FailedEmails;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.MultipartConfig;
@@ -25,7 +25,7 @@ import static ru.javaops.masterjava.common.web.ThymeleafListener.engine;
 public class UploadServlet extends HttpServlet {
     private static final int CHUNK_SIZE = 2000;
 
-    private final UserProcessor userProcessor = new UserProcessor();
+    private final PayloadProcessor processor = new PayloadProcessor();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -44,7 +44,7 @@ public class UploadServlet extends HttpServlet {
             } else {
                 Part filePart = req.getPart("fileToUpload");
                 try (InputStream in = filePart.getInputStream()) {
-                    List<FailedEmails> failed = userProcessor.process(in, chunkSize);
+                    List<FailedEmails> failed = processor.process(in, chunkSize);
                     log.info("Failed users: " + failed);
                     final WebContext webCtx = new WebContext(req, resp, req.getServletContext(), req.getLocale(),
                             ImmutableMap.of("users", failed)
