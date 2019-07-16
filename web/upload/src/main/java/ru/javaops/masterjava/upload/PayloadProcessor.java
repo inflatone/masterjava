@@ -5,12 +5,12 @@ import lombok.val;
 import ru.javaops.masterjava.xml.util.StaxStreamProcessor;
 
 import javax.xml.bind.JAXBException;
-import javax.xml.crypto.dsig.XMLSignatureException;
 import javax.xml.stream.XMLStreamException;
 import java.io.InputStream;
 import java.util.List;
 
 public class PayloadProcessor {
+    private final CityProcessor cityProcessor = new CityProcessor();
     private final UserProcessor userProcessor = new UserProcessor();
 
     @AllArgsConstructor
@@ -26,6 +26,7 @@ public class PayloadProcessor {
 
     public List<FailedEmails> process(InputStream in, int chunkSize) throws XMLStreamException, JAXBException {
         val processor = new StaxStreamProcessor(in);
-        return userProcessor.process(processor, chunkSize);
+        val cities = cityProcessor.process(processor);
+        return userProcessor.process(processor, cities, chunkSize);
     }
 }
