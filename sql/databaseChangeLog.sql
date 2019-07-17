@@ -32,7 +32,21 @@ CREATE TABLE groups
 
 CREATE TABLE user_group
 (
-    user_id INTEGER NOT NULL REFERENCES users (id) ON DELETE CASCADE,
+    user_id  INTEGER NOT NULL REFERENCES users (id) ON DELETE CASCADE,
     group_id INTEGER NOT NULL REFERENCES groups (id),
     CONSTRAINT users_group_idx UNIQUE (user_id, group_id)
 );
+
+--changeset sane5ever:3
+CREATE TABLE mail_hist
+(
+    id       SERIAL PRIMARY KEY,
+    list_to  TEXT      NULL,
+    list_cc  TEXT      NULL,
+    subject  TEXT      NULL,
+    state    TEXT      NOT NULL,
+    dateTime TIMESTAMP NOT NULL
+);
+
+COMMENT ON TABLE mail_hist IS 'История отправки email';
+COMMENT ON COLUMN mail_hist.dateTime IS 'Время отправки';
