@@ -15,7 +15,7 @@ public class MailSender {
     private static final MailCaseDao DAO = DBIProvider.getDao(MailCaseDao.class);
 
     static void sendMail(List<Addressee> to, List<Addressee> cc, String subject, String body) {
-        log.info("Send mail to \'" + to + "\' cc \'" + cc + "\' subject \'" + subject + "\'"+ (log.isDebugEnabled() ? "\nbody=" + body : ""));
+        log.info("Send mail to \'" + to + "\' cc \'" + cc + "\' subject \'" + subject + "\'" + (log.isDebugEnabled() ? "\nbody=" + body : ""));
         String state = "OK";
         try {
             val email = MailConfig.createHtmlEmail();

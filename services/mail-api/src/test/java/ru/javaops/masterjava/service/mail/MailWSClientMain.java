@@ -5,10 +5,10 @@ import com.google.common.collect.ImmutableList;
 public class MailWSClientMain {
     public static void main(String[] args) {
         MailWSClient.sendMail(
-                ImmutableList.of(new Addressee("To <sane5ever@gmail.com>")),
+                ImmutableList.of(new Addressee("To <sane5ever@ya.ru>")),
                 ImmutableList.of(),
-                "Subject",
-                "Body"
+                "Java API",
+                "Java 11 API"
         );
     }
 }
