@@ -3,7 +3,6 @@ package ru.javaops.masterjava.service.mail;
 import com.google.common.collect.ImmutableList;
 import ru.javaops.masterjava.persist.DBITestProvider;
 
-import javax.xml.soap.SOAPException;
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.ws.Endpoint;
@@ -19,7 +18,6 @@ public class MailServicePublisher {
                 new StreamSource(new File("services/mail-service/src/main/webapp/WEB-INF/wsdl/mailService.wsdl"))
         );
         endpoint.setMetadata(metadata);
-
 
 
         endpoint.publish("http://localhost:8080/mail/mailService");
