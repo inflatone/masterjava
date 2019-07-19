@@ -8,15 +8,21 @@ import ru.javaops.masterjava.persist.DBIProvider;
 import ru.javaops.masterjava.service.mail.persist.MailCase;
 import ru.javaops.masterjava.service.mail.persist.MailCaseDao;
 
-import java.util.List;
+import java.util.Set;
 
 @Slf4j
 public class MailSender {
     private static final MailCaseDao DAO = DBIProvider.getDao(MailCaseDao.class);
 
-    static void sendMail(List<Addressee> to, List<Addressee> cc, String subject, String body) {
+    static MailResult sendTo(Addressee to, String subject, String body) {
+        val state = MailResult.OK;
+        return new MailResult(to.getEmail(), state);
+    }
+
+    static String sendToGroup(Set<Addressee> to, Set<Addressee> cc, String subject, String body) {
         log.info("Send mail to \'" + to + "\' cc \'" + cc + "\' subject \'" + subject + "\'" + (log.isDebugEnabled() ? "\nbody=" + body : ""));
-        String state = "OK";
+        String state = MailResult.OK;
+        ;
         try {
             val email = MailConfig.createHtmlEmail();
             email.setSubject(subject);
@@ -37,5 +43,6 @@ public class MailSender {
         }
         DAO.insert(MailCase.of(to, cc, subject, body));
         log.info("Sent with state: " + state);
+        return state;
     }
 }
