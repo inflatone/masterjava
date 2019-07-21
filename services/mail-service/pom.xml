@@ -27,9 +27,18 @@
                     <failOnMissingWebXml>false</failOnMissingWebXml>
                     <webResources>
                         <resource>
+                            <directory>src/main/webapp</directory>
+                        </resource>
+                        <resource>
                             <directory>${masterjava.config}</directory>
                             <includes>
-                                <include>wsdl/mailSerivce.wsdl</include>
+                                <include>version.html</include>
+                            </includes>
+                        </resource>
+                        <resource>
+                            <directory>${masterjava.config}</directory>
+                            <includes>
+                                <include>wsdl/mailService.wsdl</include>
                             </includes>
                             <targetPath>WEB-INF</targetPath>
                         </resource>

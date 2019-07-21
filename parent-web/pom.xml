@@ -24,6 +24,18 @@
                 <version>3.2.2</version>
                 <configuration>
                     <failOnMissingWebXml>false</failOnMissingWebXml>
+                    <webResources>
+                        <resource>
+                            <directory>src/main/webapp</directory>
+                        </resource>
+                        <resource>
+                            <directory>${masterjava.config}</directory>
+                            <includes>
+                                <include>version.html</include>
+                            </includes>
+                            <filtering>true</filtering>
+                        </resource>
+                    </webResources>
                 </configuration>
             </plugin>
             <!--  http://stackoverflow.com/questions/4305935/is-it-possible-to-supply-tomcat6s-context-xml-file-via-the-maven-cargo-plugin#4417945 -->
@@ -73,6 +85,7 @@
                 <filtering>true</filtering>
                 <includes>
                     <include>logback.xml</include>
+                    <include>app.conf</include>
                 </includes>
             </resource>
             <resource>
