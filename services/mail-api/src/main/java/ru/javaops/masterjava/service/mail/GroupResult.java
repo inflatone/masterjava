@@ -1,14 +1,17 @@
 package ru.javaops.masterjava.service.mail;
 
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
 import java.util.List;
 
-@Data
 @NoArgsConstructor
 @AllArgsConstructor
+@XmlAccessorType(XmlAccessType.FIELD)
+@Getter
 public class GroupResult {
     /*
     number of successfully sent email
