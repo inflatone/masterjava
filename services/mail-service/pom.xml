@@ -39,6 +39,7 @@
                             <directory>${masterjava.config}</directory>
                             <includes>
                                 <include>wsdl/mailService.wsdl</include>
+                                <include>wsdl/common.xsd</include>
                             </includes>
                             <targetPath>WEB-INF</targetPath>
                         </resource>
@@ -64,6 +65,12 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-email</artifactId>
             <version>1.5</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>javax.activation</groupId>
+                    <artifactId>activation</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
