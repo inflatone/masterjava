@@ -11,18 +11,22 @@ import ru.javaops.masterjava.service.mail.persist.MailCase;
 import ru.javaops.masterjava.service.mail.persist.MailCaseDao;
 import ru.javaops.masterjava.web.WebStateException;
 
+import javax.mail.internet.MimeUtility;
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Set;
 
 @Slf4j
 public class MailSender {
     private static final MailCaseDao DAO = DBIProvider.getDao(MailCaseDao.class);
 
-    static MailResult sendTo(Addressee to, String subject, String body) throws WebStateException {
-        val state = sendToGroup(ImmutableSet.of(to), ImmutableSet.of(), subject, body);
+    static MailResult sendTo(Addressee to, String subject, String body, List<Attachment> attachments) throws WebStateException {
+        val state = sendToGroup(ImmutableSet.of(to), ImmutableSet.of(), subject, body, attachments);
         return new MailResult(to.getEmail(), state);
     }
 
-    static String sendToGroup(Set<Addressee> to, Set<Addressee> cc, String subject, String body) throws WebStateException{
+    static String sendToGroup(Set<Addressee> to, Set<Addressee> cc, String subject, String body, List<Attachment> attachments) throws WebStateException {
         log.info("Send mail to \'" + to + "\' cc \'" + cc + "\' subject \'" + subject + "\'" + (log.isDebugEnabled() ? "\nbody=" + body : ""));
         String state = MailResult.OK;
         try {
@@ -36,10 +40,14 @@ public class MailSender {
                 email.addCc(addressee.getEmail(), addressee.getName());
             }
 
+            for (Attachment attachment : attachments) {
+                email.attach(attachment.getDataHandler().getDataSource(), encodeWord(attachment.getName()), null);
+            }
+
             // https://yandex.ru/blog/company/66296
             email.setHeaders(ImmutableMap.of("List-Unsubscribe", "<mailto:sane5ever@yandex.ru?subject=Unsubscribe&body=Unsubscribe>"));
             email.send();
-        } catch (EmailException e) {
+        } catch (EmailException | UnsupportedEncodingException e) {
             log.error(e.getMessage(), e);
             state = e.getMessage();
         }
@@ -51,5 +59,10 @@ public class MailSender {
         }
         log.info("Sent with state: " + state);
         return state;
+    }
+
+    private static String encodeWord(String word) throws UnsupportedEncodingException {
+        return word == null ? null :
+                MimeUtility.encodeWord(word, StandardCharsets.UTF_8.name(), null);
     }
 }
