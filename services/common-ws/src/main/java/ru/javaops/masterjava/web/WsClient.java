@@ -1,8 +1,10 @@
 package ru.javaops.masterjava.web;
 
 import com.typesafe.config.Config;
+import org.slf4j.event.Level;
 import ru.javaops.masterjava.ExceptionType;
 import ru.javaops.masterjava.config.Configs;
+import ru.javaops.masterjava.web.handler.SoapLoggingHandlers.ClientHandler;
 
 import javax.xml.namespace.QName;
 import javax.xml.ws.Binding;
@@ -19,7 +21,40 @@ public class WsClient<T> {
 
     private final Class<T> serviceClass;
     private final Service service;
-    private String endpointAddress;
+    private HostConfig hostConfig;
+
+    public static class HostConfig {
+        public final String endpoint;
+        public final Level serverDebugLevel;
+        public final String user;
+        public final String password;
+        public final String authHeader;
+        public final ClientHandler clientLoggingHandler;
+
+        public HostConfig(Config config, String endpointAddress) {
+            endpoint = config.getString("endpoint") + endpointAddress;
+            serverDebugLevel = config.getEnum(Level.class, "server.debugLevel");
+
+            // https://github.com/typesafehub/config/issues/282
+            if (!config.getIsNull("user") && !config.getIsNull("password")) {
+                user = config.getString("user");
+                password = config.getString("password");
+                authHeader = AuthUtil.encodeBasicAuthHeader(user, password);
+            } else {
+                user = password = authHeader = null;
+            }
+            clientLoggingHandler = config.getIsNull("client.debugLevel") ? null
+                    : new ClientHandler(config.getEnum(Level.class, "client.debugLevel"));
+        }
+
+        public boolean hasAuth() {
+            return authHeader != null;
+        }
+
+        public boolean hasHandler() {
+            return clientLoggingHandler != null;
+        }
+    }
 
     static {
         HOSTS = Configs.getConfig("hosts.conf", "hosts");
@@ -31,15 +66,28 @@ public class WsClient<T> {
     }
 
     public void init(String host, String endpointAddress) {
-        this.endpointAddress = HOSTS.getConfig(host).getString("endpoint") + endpointAddress;
+        this.hostConfig = new HostConfig(
+                HOSTS.getConfig(host).withFallback(Configs.getConfig("default.conf")),
+                endpointAddress
+        );
     }
+    public HostConfig getHostConfig() {
+        return hostConfig;
+    }
+
 
     // Post is not thread-safe (http://stackoverflow.com/a/10601916/548473)
     public T getPort(WebServiceFeature... features) {
         T port = service.getPort(serviceClass, features);
         BindingProvider provider = (BindingProvider) port;
         Map<String, Object> requestCtx = provider.getRequestContext();
-        requestCtx.put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, endpointAddress);
+        requestCtx.put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, hostConfig.endpoint);
+        if (hostConfig.hasAuth()) {
+            setAuth(port, hostConfig.user, hostConfig.password);
+        }
+        if (hostConfig.hasHandler()) {
+            setHandler(port, hostConfig.clientLoggingHandler);
+        }
         return port;
     }
 
