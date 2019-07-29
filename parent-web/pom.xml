@@ -16,6 +16,10 @@
     <packaging>pom</packaging>
     <name>Parent Web</name>
 
+    <properties>
+        <maven.resources.iverwrite>true</maven.resources.iverwrite>
+    </properties>
+
     <build>
         <plugins>
             <plugin>
