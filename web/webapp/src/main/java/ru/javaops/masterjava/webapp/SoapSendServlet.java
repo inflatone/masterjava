@@ -15,8 +15,8 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
 @Slf4j
-@WebServlet("/send")
-public class SendServlet extends HttpServlet {
+@WebServlet("/sendSoap")
+public class SoapSendServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         String result;

@@ -17,7 +17,8 @@
     <name>Parent Web</name>
 
     <properties>
-        <maven.resources.iverwrite>true</maven.resources.iverwrite>
+        <maven.resources.overwrite>true</maven.resources.overwrite>
+        <activemq.version>5.15.9</activemq.version>
     </properties>
 
     <build>
