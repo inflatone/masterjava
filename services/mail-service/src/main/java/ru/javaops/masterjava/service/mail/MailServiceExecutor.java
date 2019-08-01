@@ -1,5 +1,6 @@
 package ru.javaops.masterjava.service.mail;
 
+import akka.dispatch.Futures;
 import lombok.extern.slf4j.Slf4j;
 import one.util.streamex.StreamEx;
 import ru.javaops.masterjava.ExceptionType;
@@ -7,12 +8,15 @@ import ru.javaops.masterjava.service.mail.util.MailUtils;
 import ru.javaops.masterjava.service.mail.util.MailUtils.MailObject;
 import ru.javaops.masterjava.web.WebStateException;
 import ru.javaops.masterjava.web.WsClient;
+import scala.concurrent.ExecutionContext;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
+
+import static java.util.concurrent.TimeUnit.SECONDS;
 
 @Slf4j
 public class MailServiceExecutor {
@@ -34,7 +38,7 @@ public class MailServiceExecutor {
             public GroupResult call() throws WebStateException {
                 while (!futures.isEmpty()) {
                     try {
-                        Future<MailResult> future = competitionService.poll(20, TimeUnit.SECONDS);
+                        Future<MailResult> future = competitionService.poll(20, SECONDS);
                         if (future == null) {
                             cancel(INTERRUPTED_BY_TIMEOUT, null);
                         }
@@ -68,6 +72,17 @@ public class MailServiceExecutor {
                 }
             }
         }.call();
+    }
+
+    public static scala.concurrent.Future<GroupResult> sendAsyncWithReply(MailObject mailObject, ExecutionContext context) {
+        // http://doc.akka.io/docs/akka/current/java/futures.html
+        return Futures.future(
+                () -> sendBulk(
+                        MailUtils.split(mailObject.getUsers()),
+                        mailObject.getSubject(), mailObject.getBody(),
+                        MailUtils.getAttachments(mailObject.getAttachments())
+                ), context
+        );
     }
 
     public static void sendAsync(MailObject mailObject) {

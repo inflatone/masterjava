@@ -9,12 +9,15 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlValue;
+import java.io.Serializable;
 
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @XmlAccessorType(XmlAccessType.FIELD)
-public class MailResult {
+public class MailResult implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     public static final String OK = "OK";
     @XmlAttribute
     private @NonNull String email;

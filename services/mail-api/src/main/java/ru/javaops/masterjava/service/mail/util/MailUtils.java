@@ -6,7 +6,6 @@ import com.google.common.collect.Iterables;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NonNull;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.CloseShieldInputStream;
 import ru.javaops.masterjava.service.mail.Addressee;
 import ru.javaops.masterjava.service.mail.Attachment;
@@ -14,7 +13,6 @@ import ru.javaops.masterjava.service.mail.Attachment;
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
 import java.io.*;
-import java.util.AbstractMap;
 import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.List;
 import java.util.Set;
@@ -29,6 +27,8 @@ public class MailUtils {
     @Data
     @AllArgsConstructor
     public static class MailObject implements Serializable {
+        private static final long serialVersionUID = 1L;
+
         private @NonNull String users;
         private String subject;
         private @NonNull String body;
