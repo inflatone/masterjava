@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableList;
 import lombok.extern.slf4j.Slf4j;
 import ru.javaops.masterjava.service.mail.util.MailUtils.MailObject;
 import ru.javaops.masterjava.util.Functions;
+import scala.annotation.meta.param;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -18,6 +19,21 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 
 @Slf4j
 public class WebUtil {
+    public static void doAsync(HttpServletResponse resp, Functions.RunnableEx doer) throws IOException {
+        resp.setCharacterEncoding(UTF_8.name());
+        try {
+            log.info("Start asynchronous processing...");
+            doer.run();
+            log.info("Asynchronous processing running...");
+        } catch (Exception e) {
+            log.error("Asynchronous processing failed", e);
+            String message = e.getMessage();
+            String result = message != null ? message : e.getClass().getName();
+            resp.getWriter().write(result);
+        }
+    }
+
+
     public static void doAndWriteResponse(HttpServletResponse response, Functions.SupplierEx<String> doer) throws IOException {
         log.info("Start sending");
         response.setCharacterEncoding(UTF_8.name());

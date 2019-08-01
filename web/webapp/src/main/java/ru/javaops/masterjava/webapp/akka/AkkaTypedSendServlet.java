@@ -4,9 +4,11 @@ import lombok.extern.slf4j.Slf4j;
 import ru.javaops.masterjava.service.mail.GroupResult;
 import ru.javaops.masterjava.service.mail.MailRemoteService;
 import ru.javaops.masterjava.service.mail.util.MailUtils.MailObject;
+import ru.javaops.masterjava.util.Exceptions;
 import scala.concurrent.Await;
 import scala.concurrent.duration.Duration;
 
+import javax.servlet.AsyncContext;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.MultipartConfig;
@@ -18,8 +20,7 @@ import java.io.IOException;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.concurrent.TimeUnit.SECONDS;
-import static ru.javaops.masterjava.webapp.WebUtil.createMailObject;
-import static ru.javaops.masterjava.webapp.WebUtil.doAndWriteResponse;
+import static ru.javaops.masterjava.webapp.WebUtil.*;
 import static ru.javaops.masterjava.webapp.akka.AkkaWebappListener.akkaActivator;
 
 @Slf4j
@@ -36,9 +37,17 @@ public class AkkaTypedSendServlet extends HttpServlet {
     }
 
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         req.setCharacterEncoding(UTF_8.name());
-        doAndWriteResponse(resp, () -> sendAkka(createMailObject(req)));
+        doAsync(resp, () -> {
+            MailObject mailObject = createMailObject(req);
+            final AsyncContext asyncCtx = req.startAsync();
+            asyncCtx.start(
+                    Exceptions.wrap(() -> {
+                                doAndWriteResponse((HttpServletResponse) asyncCtx.getResponse(), () -> sendAkka(mailObject));
+                                asyncCtx.complete();
+                            }));
+        });
     }
 
     private String sendAkka(MailObject mailObject) throws Exception {
