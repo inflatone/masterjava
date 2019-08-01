@@ -42,11 +42,6 @@ public class MailWSClient {
         return result;
     }
 
-    public static Set<Addressee> split(String addressees) {
-        Iterable<String> adds = Splitter.on(',').trimResults().omitEmptyStrings().split(addressees);
-        return ImmutableSet.copyOf(Iterables.transform(adds, Addressee::new));
-    }
-
     public static HostConfig getHostConfig() {
         return WS_CLIENT.getHostConfig();
     }

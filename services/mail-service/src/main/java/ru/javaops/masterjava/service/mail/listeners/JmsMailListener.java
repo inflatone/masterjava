@@ -1,6 +1,10 @@
 package ru.javaops.masterjava.service.mail.listeners;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.activemq.ActiveMQConnectionFactory;
+import ru.javaops.masterjava.service.mail.MailServiceExecutor;
+import ru.javaops.masterjava.service.mail.util.MailUtils;
+import ru.javaops.masterjava.service.mail.util.MailUtils.MailObject;
 
 import javax.jms.*;
 import javax.naming.InitialContext;
@@ -18,8 +22,9 @@ public class JmsMailListener implements ServletContextListener {
     public void contextInitialized(ServletContextEvent sce) {
         try {
             InitialContext initialContext = new InitialContext();
-            QueueConnectionFactory connectionFactory
-                    = (QueueConnectionFactory) initialContext.lookup("java:comp/env/jms/ConnectionFactory");
+            ActiveMQConnectionFactory connectionFactory
+                    = (ActiveMQConnectionFactory) initialContext.lookup("java:comp/env/jms/ConnectionFactory");
+            connectionFactory.setTrustAllPackages(true);
             connection = connectionFactory.createQueueConnection();
             QueueSession queueSession = connection.createQueueSession(false, Session.AUTO_ACKNOWLEDGE);
             Queue queue = (Queue) initialContext.lookup("java:comp/env/jms/queue/MailQueue");
@@ -30,11 +35,11 @@ public class JmsMailListener implements ServletContextListener {
                 try {
                     while (!Thread.interrupted()) {
                         Message m = receiver.receive();
-                        // TODO implement mail sending
-                        if (m instanceof TextMessage) {
-                            TextMessage textMessage = (TextMessage) m;
-                            String text = textMessage.getText();
-                            log.info("Received TextMessage with text '{}'", text);
+                        if (m instanceof ObjectMessage) {
+                            ObjectMessage om = (ObjectMessage) m;
+                            MailObject mailObject = (MailObject) om.getObject();
+                            log.info("Received MailObject {}", mailObject);
+                            MailServiceExecutor.sendAsync(mailObject);
                         }
                     }
                 } catch (Exception e) {

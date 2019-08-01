@@ -1,6 +1,8 @@
 package ru.javaops.masterjava.webapp;
 
 import lombok.extern.slf4j.Slf4j;
+import ru.javaops.masterjava.service.mail.util.MailUtils;
+import ru.javaops.masterjava.service.mail.util.MailUtils.MailObject;
 
 import javax.jms.*;
 import javax.naming.InitialContext;
@@ -10,6 +12,7 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.Part;
 import java.io.IOException;
 import java.lang.IllegalStateException;
 import java.nio.charset.StandardCharsets;
@@ -36,16 +39,22 @@ public class JmsSendServlet extends HttpServlet {
     }
 
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         String result;
         try {
             log.info("Start sending");
             req.setCharacterEncoding(StandardCharsets.UTF_8.name());
             resp.setCharacterEncoding(StandardCharsets.UTF_8.name());
-            String users = req.getParameter("users");
-            String subject = req.getParameter("subject");
-            String body = req.getParameter("body");
-            result = sendJms(users, subject, body);
+            Part filePart = req.getPart("attach");
+
+            MailObject mailObject = MailUtils.getMailObject(
+                    req.getParameter("users"),
+                    req.getParameter("subject"),
+                    req.getParameter("body"),
+                    filePart == null ? null : filePart.getSubmittedFileName(),
+                    filePart == null ? null : filePart.getInputStream()
+            );
+            result = sendJms(mailObject);
             log.info("Processing finished with result: {}", result);
         } catch (Exception e) {
             log.error("Processing failed", e);
@@ -65,10 +74,10 @@ public class JmsSendServlet extends HttpServlet {
         }
     }
 
-    private synchronized String sendJms(String users, String subject, String body) throws JMSException {
-        TextMessage message = session.createTextMessage();
-        message.setText(subject);
-        producer.send(message);
+    private synchronized String sendJms(MailObject mailObject) throws JMSException {
+        ObjectMessage objectMessage = session.createObjectMessage();
+        objectMessage.setObject(mailObject);
+        producer.send(objectMessage);
         return "Successfully send JMS message";
     }
 }

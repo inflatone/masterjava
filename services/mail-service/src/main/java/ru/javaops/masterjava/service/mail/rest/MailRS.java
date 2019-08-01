@@ -7,8 +7,8 @@ import org.glassfish.jersey.media.multipart.FormDataParam;
 import ru.javaops.masterjava.service.mail.Attachment;
 import ru.javaops.masterjava.service.mail.GroupResult;
 import ru.javaops.masterjava.service.mail.MailServiceExecutor;
-import ru.javaops.masterjava.service.mail.MailWSClient;
-import ru.javaops.masterjava.service.mail.util.Attachments.ProxyDataSource;
+import ru.javaops.masterjava.service.mail.util.MailUtils.ProxyDataSource;
+import ru.javaops.masterjava.service.mail.util.MailUtils;
 import ru.javaops.masterjava.web.WebStateException;
 
 import javax.activation.DataHandler;
@@ -47,7 +47,7 @@ public class MailRS {
             BodyPartEntity bodyPartEntity = (BodyPartEntity) attachBodyPart.getEntity();
             attachments = ImmutableList.of(new Attachment(utf8name, new DataHandler((ProxyDataSource) bodyPartEntity::getInputStream)));
         }
-        return MailServiceExecutor.sendBulk(MailWSClient.split(users), subject, body, attachments);
+        return MailServiceExecutor.sendBulk(MailUtils.split(users), subject, body, attachments);
     }
 
 
