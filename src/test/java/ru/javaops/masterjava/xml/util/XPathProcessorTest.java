@@ -24,7 +24,7 @@ class XPathProcessorTest {
             );
         }
         var result = buffer.toString();
-        assertEquals("Санкт-Петербург\nКиев\nМинск", result);
+        assertEquals("Санкт-Петербург\nМосква\nКиев\nМинск", result);
         System.out.println(result);
     }
 

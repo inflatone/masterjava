@@ -26,11 +26,11 @@ class JAXBParserTest {
                 getResource("payload.xml").openStream()
         );
 
-        assertEquals(3, payload.getUsers().getUser().size());
-        assertEquals(3, payload.getCities().getCity().size());
+        assertEquals(6, payload.getUsers().getUser().size());
+        assertEquals(4, payload.getCities().getCity().size());
 
         assertEquals("gmail@gmail.com", payload.getUsers().getUser().get(0).getEmail());
-        assertEquals("Admin", payload.getUsers().getUser().get(1).getFullName());
+        assertEquals("Admin", payload.getUsers().getUser().get(1).getValue());
         assertEquals("deleted", payload.getUsers().getUser().get(2).getFlag().value());
 
         var payloadAsLine = JAXB_PARSER.marshal(payload);

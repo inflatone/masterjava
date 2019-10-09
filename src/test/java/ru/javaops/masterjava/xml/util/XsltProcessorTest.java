@@ -13,7 +13,7 @@ class XsltProcessorTest {
         ) {
             var processor = new XsltProcessor(xslIn);
             var result = processor.transform(xmlIn);
-            assertEquals(String.format("Санкт-Петербург%nКиев%nМинск%n"), result);
+            assertEquals(String.format("Санкт-Петербург%nМосква%nКиев%nМинск%n"), result);
             System.out.println(result);
         }
     }

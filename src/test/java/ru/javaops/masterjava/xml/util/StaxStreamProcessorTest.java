@@ -24,7 +24,7 @@ class StaxStreamProcessorTest {
             }
         }
         var result = buffer.toString();
-        assertEquals("Санкт-Петербург\nКиев\nМинск", result);
+        assertEquals("Санкт-Петербург\nМосква\nКиев\nМинск", result);
         System.out.println(result);
     }
 
@@ -37,7 +37,7 @@ class StaxStreamProcessorTest {
             }
         }
         var result = buffer.toString();
-        assertEquals("Санкт-Петербург\nКиев\nМинск", buffer.toString());
+        assertEquals("Санкт-Петербург\nМосква\nКиев\nМинск", buffer.toString());
         System.out.println(result);
     }
 
