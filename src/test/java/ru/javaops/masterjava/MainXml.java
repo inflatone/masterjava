@@ -9,6 +9,7 @@ import ru.javaops.masterjava.xml.schema.User;
 import ru.javaops.masterjava.xml.util.JAXBParser;
 import ru.javaops.masterjava.xml.util.Schemas;
 import ru.javaops.masterjava.xml.util.StaxStreamProcessor;
+import ru.javaops.masterjava.xml.util.XsltProcessor;
 
 import javax.xml.stream.events.XMLEvent;
 import java.net.URL;
@@ -27,7 +28,8 @@ public class MainXml {
     public static void main(String[] args) throws Exception {
         if (args.length != 1) {
             System.out.println("Format: projectName");
-            System.exit(1);
+            args = new String[]{"topjava"};
+            // System.exit(1);
         }
         String projectName = args[0];
         var payloadUrl = getResource("payload.xml");
@@ -43,6 +45,12 @@ public class MainXml {
         System.out.println();
         users = processByStax(projectName, payloadUrl);
         users.forEach(System.out::println);
+
+        System.out.println();
+        html = transform(projectName, payloadUrl);
+        try (var writer = Files.newBufferedWriter(Paths.get("out/groups.html"))) {
+            writer.write(html);
+        }
     }
 
     private static Set<User> parseByJaxb(String projectName, URL payloadUrl) throws Exception {
@@ -79,7 +87,7 @@ public class MainXml {
             if (groupNames.isEmpty()) {
                 throw new IllegalArgumentException("Invalid project name '" + projectName + "' or there're no groups");
             }
-            
+
             final var users = new TreeSet<>(USER_COMPARATOR);
             final var parser = new JAXBParser(User.class);
 
@@ -105,5 +113,15 @@ public class MainXml {
                 head().with(title(projectName + " users")),
                 body().with(h1(projectName + " users"), table)
         ).render();
+    }
+
+    private static String transform(String projectName, URL payloadUrl) throws Exception {
+        var xslUrl = getResource("groups.xsl");
+        try (var xmlIn = payloadUrl.openStream();
+             var xslIn = xslUrl.openStream()) {
+            final var processor = new XsltProcessor(xslIn);
+            processor.setParameter("projectName", projectName);
+            return processor.transform(xmlIn);
+        }
     }
 }
