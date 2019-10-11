@@ -1,26 +1,29 @@
 package ru.javaops.masterjava;
 
-import com.google.common.io.Resources;
+import com.google.common.base.Splitter;
 import j2html.tags.ContainerTag;
 import one.util.streamex.StreamEx;
 import ru.javaops.masterjava.xml.schema.ObjectFactory;
 import ru.javaops.masterjava.xml.schema.Payload;
-import ru.javaops.masterjava.xml.schema.Project;
-import ru.javaops.masterjava.xml.schema.Project.Group;
 import ru.javaops.masterjava.xml.schema.User;
 import ru.javaops.masterjava.xml.util.JAXBParser;
 import ru.javaops.masterjava.xml.util.Schemas;
+import ru.javaops.masterjava.xml.util.StaxStreamProcessor;
 
+import javax.xml.stream.events.XMLEvent;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.google.common.base.Strings.nullToEmpty;
 import static com.google.common.io.Resources.getResource;
 import static j2html.TagCreator.*;
 
 public class MainXml {
+    private static final Comparator<User> USER_COMPARATOR = Comparator.comparing(User::getValue).thenComparing(User::getEmail);
+
     public static void main(String[] args) throws Exception {
         if (args.length != 1) {
             System.out.println("Format: projectName");
@@ -30,12 +33,16 @@ public class MainXml {
         var payloadUrl = getResource("payload.xml");
         var users = parseByJaxb(projectName, payloadUrl);
         users.forEach(System.out::println);
+        System.out.println();
 
         var html = toHtml(users, projectName);
         System.out.println(html);
         try (var writer = Files.newBufferedWriter(Paths.get("out/users.html"))) {
             writer.write(html);
         }
+        System.out.println();
+        users = processByStax(projectName, payloadUrl);
+        users.forEach(System.out::println);
     }
 
     private static Set<User> parseByJaxb(String projectName, URL payloadUrl) throws Exception {
@@ -53,8 +60,45 @@ public class MainXml {
         final var groups = new HashSet<>(project.getGroup()); // // identity compare
         return StreamEx.of(payload.getUsers().getUser())
                 .filter(u -> !Collections.disjoint(groups, u.getGroupRefs()))
-                .collect(Collectors.toCollection(
-                        () -> new TreeSet<>(Comparator.comparing(User::getValue).thenComparing(User::getEmail))));
+                .collect(Collectors.toCollection(() -> new TreeSet<>(USER_COMPARATOR)));
+    }
+
+    private static Set<User> processByStax(String projectName, URL payloadUrl) throws Exception {
+        try (var in = payloadUrl.openStream()) {
+            var processor = new StaxStreamProcessor(in);
+            final var groupNames = new HashSet<>();
+
+            // Projects loop:
+            projects:
+            while (processor.doUntil(XMLEvent.START_ELEMENT, "Project")) {
+                if (projectName.equals(processor.getAttribute("name"))) {
+                    // Groups loop
+                    String element;
+                    while ((element = processor.doUntilAny(XMLEvent.START_ELEMENT, "Project", "Group", "Users")) != null) {
+                        if (!element.equals("Group")) {
+                            break projects;
+                        }
+                        groupNames.add(processor.getAttribute("name"));
+                    }
+                }
+            }
+            if (groupNames.isEmpty()) {
+                throw new IllegalArgumentException("Invalid project name '" + projectName + "' or there're no groups");
+            }
+
+            // User loop
+            final var users = new TreeSet<>(USER_COMPARATOR);
+            while (processor.doUntil(XMLEvent.START_ELEMENT, "User")) {
+                var groupRefs = processor.getAttribute("groupRefs");
+                if (!Collections.disjoint(groupNames, Splitter.on(' ').splitToList(nullToEmpty(groupRefs)))) {
+                    var user = new User();
+                    user.setEmail(processor.getAttribute("email"));
+                    user.setValue(processor.getText());
+                    users.add(user);
+                }
+            }
+            return users;
+        }
     }
 
     private static String toHtml(Set<User> users, String projectName) {
