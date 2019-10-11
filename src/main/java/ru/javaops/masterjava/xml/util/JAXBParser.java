@@ -4,6 +4,7 @@ import org.xml.sax.SAXException;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
+import javax.xml.stream.XMLStreamReader;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
 import java.io.*;
@@ -47,6 +48,10 @@ public class JAXBParser {
 
     public <T> T unmarshal(String line) throws JAXBException {
         return (T) unmarshaller.unmarshal(line);
+    }
+
+    public <T> T unmarshal(XMLStreamReader reader, Class<T> clazz) throws JAXBException {
+        return unmarshaller.unmarshal(reader, clazz);
     }
 
     // Marshaller
