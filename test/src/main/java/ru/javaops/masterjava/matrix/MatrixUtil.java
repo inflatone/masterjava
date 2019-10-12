@@ -7,7 +7,7 @@ import java.util.stream.IntStream;
 
 public class MatrixUtil {
 
-    public static int[][] concurrentMultiplyWithCompletionService(int[][] matrixA, int[][] matrixB, ExecutorService executor) {
+    static int[][] concurrentMultiplyWithCompletionService(int[][] matrixA, int[][] matrixB, ExecutorService executor) {
         final int matrixSize = matrixA.length;
         final int[][] matrixC = new int[matrixSize][matrixSize];
         final CompletionService<Void> completionService = new ExecutorCompletionService<>(executor);
@@ -20,10 +20,9 @@ public class MatrixUtil {
         return matrixC;
     }
 
-    public static int[][] concurrentMultiply(int[][] matrixA, int[][] matrixB, ExecutorService executor) throws InterruptedException {
+    static int[][] concurrentMultiply(int[][] matrixA, int[][] matrixB, ExecutorService executor) throws InterruptedException {
         final int matrixSize = matrixA.length;
         final int[][] matrixC = new int[matrixSize][matrixSize];
-        final CompletionService<Void> completionService = new ExecutorCompletionService<>(executor);
         Set<Callable<Void>> tasks = IntStream.range(0, matrixSize)
                 .<Callable<Void>>mapToObj(j -> () -> calculate(matrixA, matrixB, new int[matrixSize], matrixC, j, matrixSize))
                 .collect(Collectors.toSet());
@@ -31,7 +30,7 @@ public class MatrixUtil {
         return matrixC;
     }
 
-    public static int[][] concurrentMultiply2(int[][] matrixA, int[][] matrixB, ExecutorService executor) throws InterruptedException {
+    static int[][] concurrentMultiply2(int[][] matrixA, int[][] matrixB, ExecutorService executor) throws InterruptedException {
         final int matrixSize = matrixA.length;
         final int[][] matrixC = new int[matrixSize][matrixSize];
         final CountDownLatch latch = new CountDownLatch(matrixSize);
@@ -47,7 +46,7 @@ public class MatrixUtil {
         return matrixC;
     }
 
-    public static int[][] concurrentMultiplyStream(int[][] matrixA, int[][] matrixB) {
+    static int[][] concurrentMultiplyStream(int[][] matrixA, int[][] matrixB) {
         final int matrixSize = matrixA.length;
         final int[][] matrixC = new int[matrixSize][matrixSize];
         IntStream.range(0, matrixSize)
@@ -57,7 +56,7 @@ public class MatrixUtil {
         return matrixC;
     }
 
-    public static int[][] singleThreadMultiply(int[][] matrixA, int[][] matrixB) {
+    static int[][] singleThreadMultiply(int[][] matrixA, int[][] matrixB) {
         final int matrixSize = matrixA.length;
         final int[][] matrixC = new int[matrixSize][matrixSize];
 
@@ -97,7 +96,7 @@ public class MatrixUtil {
         }
     }
 
-    public static int[][] create(int size) {
+    static int[][] create(int size) {
         int[][] matrix = new int[size][size];
         Random rn = new Random();
 

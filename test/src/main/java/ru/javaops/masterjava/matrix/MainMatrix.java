@@ -1,6 +1,5 @@
 package ru.javaops.masterjava.matrix;
 
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -10,7 +9,7 @@ public class MainMatrix {
 
     private final static ExecutorService executor = Executors.newFixedThreadPool(MainMatrix.THREAD_NUMBER);
 
-    public static void main(String[] args) throws ExecutionException, InterruptedException {
+    public static void main(String[] args) throws InterruptedException {
         final int[][] matrixA = MatrixUtil.create(MATRIX_SIZE);
         final int[][] matrixB = MatrixUtil.create(MATRIX_SIZE);
 
@@ -77,7 +76,7 @@ public class MainMatrix {
         private int[][] matrix;
         private double duration;
 
-        public Result(int[][] matrix, double duration) {
+        Result(int[][] matrix, double duration) {
             this.matrix = matrix;
             this.duration = duration;
         }
