@@ -55,10 +55,11 @@ public class MainXml {
 
     private static Set<User> parseByJaxb(String projectName, URL payloadUrl) throws Exception {
         var parser = new JAXBParser(ObjectFactory.class);
+        var unmarshaller = parser.createUnmarshaller();
         parser.setSchema(Schemas.ofClasspath("payload.xsd"));
         Payload payload;
         try (var in = payloadUrl.openStream()) {
-            payload = parser.unmarshal(in);
+            payload = unmarshaller.unmarshal(in);
         }
 
         var project = StreamEx.of(payload.getProjects().getProject())
@@ -89,12 +90,13 @@ public class MainXml {
             }
 
             final var users = new TreeSet<>(USER_COMPARATOR);
-            final var parser = new JAXBParser(User.class);
+            final var parser = new JAXBParser(ObjectFactory.class);
+            final var unmarshaller = parser.createUnmarshaller();
 
             while (processor.doUntil(XMLEvent.START_ELEMENT, "User")) {
                 var groupRefs = processor.getAttribute("groupRefs");
                 if (!Collections.disjoint(groupNames, Splitter.on(' ').splitToList(nullToEmpty(groupRefs)))) {
-                    var user = parser.unmarshal(processor.getReader(), User.class);
+                    var user = unmarshaller.unmarshal(processor.getReader(), User.class);
                     users.add(user);
                 }
             }

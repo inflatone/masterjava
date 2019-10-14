@@ -16,23 +16,26 @@ public class JAXBUnmarshaller {
         unmarshaller = context.createUnmarshaller();
     }
 
-    public synchronized void setSchema(Schema schema) {
+    public void setSchema(Schema schema) {
         unmarshaller.setSchema(schema);
     }
 
-    public synchronized Object unmarshal(InputStream in) throws JAXBException {
-        return unmarshaller.unmarshal(in);
+    @SuppressWarnings("unchecked")
+    public <T> T unmarshal(InputStream in) throws JAXBException {
+        return (T) unmarshaller.unmarshal(in);
     }
 
-    public synchronized Object unmarshal(Reader reader) throws JAXBException {
-        return unmarshaller.unmarshal(reader);
+    @SuppressWarnings("unchecked")
+    public <T> T unmarshal(Reader reader) throws JAXBException {
+        return (T) unmarshaller.unmarshal(reader);
     }
 
-    public Object unmarshal(String line) throws JAXBException {
-        return unmarshal(new StringReader(line));
+    @SuppressWarnings("unchecked")
+    public <T> T unmarshal(String line) throws JAXBException {
+        return (T) unmarshal(new StringReader(line));
     }
 
-    public synchronized <T> T unmarshal(XMLStreamReader reader, Class<T> clazz) throws JAXBException {
+    public <T> T unmarshal(XMLStreamReader reader, Class<T> clazz) throws JAXBException {
         return unmarshaller.unmarshal(reader, clazz).getValue();
     }
 }

@@ -8,6 +8,7 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.xml.bind.JAXBException;
 import javax.xml.stream.XMLStreamException;
 import java.io.IOException;
 
@@ -39,7 +40,7 @@ public class UploadServlet extends HttpServlet {
                 engine.process("result", webContext, response.getWriter());
             }
 
-        } catch (XMLStreamException e) {
+        } catch (XMLStreamException | JAXBException e) {
             webContext.setVariable("exception", e);
             engine.process("exception", webContext, response.getWriter());
         }

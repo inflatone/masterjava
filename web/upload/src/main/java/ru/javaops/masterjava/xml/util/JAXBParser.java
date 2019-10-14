@@ -4,21 +4,24 @@ import org.xml.sax.SAXException;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
-import javax.xml.stream.XMLStreamReader;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
-import java.io.*;
+import java.io.IOException;
+import java.io.Reader;
+import java.io.StringReader;
 
+/**
+ * Marshalling/Unmarshalling JAXB facade
+ */
 public class JAXBParser {
-    protected JAXBMarshaller marshaller;
-    protected JAXBUnmarshaller unmarshaller;
+    private JAXBContext context;
     protected Schema schema;
 
     public JAXBParser(Class... classesToBeBound) {
         try {
             init(JAXBContext.newInstance(classesToBeBound));
         } catch (JAXBException e) {
-            throw new IllegalArgumentException(e);
+            throw new IllegalStateException(e);
         }
     }
 
@@ -27,57 +30,44 @@ public class JAXBParser {
         try {
             init(JAXBContext.newInstance(contextPath));
         } catch (JAXBException e) {
-            throw new IllegalArgumentException(e);
+            throw new IllegalStateException(e);
         }
     }
 
-    private void init(JAXBContext context) throws JAXBException {
-        marshaller = new JAXBMarshaller(context);
-        unmarshaller = new JAXBUnmarshaller(context);
+    private void init(JAXBContext context) {
+        this.context = context;
     }
 
-    // Unmarshaller
-
-    public <T> T unmarshal(InputStream in) throws JAXBException {
-        return (T) unmarshaller.unmarshal(in);
-    }
-
-    public <T> T unmarshal(Reader reader) throws JAXBException {
-        return (T) unmarshaller.unmarshal(reader);
-    }
-
-    public <T> T unmarshal(String line) throws JAXBException {
-        return (T) unmarshaller.unmarshal(line);
-    }
-
-    public <T> T unmarshal(XMLStreamReader reader, Class<T> clazz) throws JAXBException {
-        return unmarshaller.unmarshal(reader, clazz);
-    }
-
-    // Marshaller
-
-    public void setMarshallerProperty(String key, Object value) {
+    // https://stackoverflow.com/a/7400735/548473
+    public JAXBMarshaller createMarshaller() {
         try {
-            marshaller.setProperty(key, value);
+            var marshaller = new JAXBMarshaller(context);
+            if (schema != null) {
+                marshaller.setSchema(schema);
+            }
+            return marshaller;
         } catch (JAXBException e) {
-            throw new IllegalArgumentException(e);
+            throw new IllegalStateException(e);
         }
     }
 
-    public String marshal(Object instance) throws JAXBException {
-        return marshaller.marshal(instance);
-    }
-
-    public void marshal(Object instance, Writer writer) throws JAXBException {
-        marshaller.marshal(instance, writer);
+    // https://stackoverflow.com/a/7400735/548473
+    public JAXBUnmarshaller createUnmarshaller() {
+        try {
+            var unmarshaller = new JAXBUnmarshaller(context);
+            if (schema != null) {
+                unmarshaller.setSchema(schema);
+            }
+            return unmarshaller;
+        } catch (JAXBException e) {
+            throw new IllegalStateException(e);
+        }
     }
 
     // Schema validator
 
     public void setSchema(Schema schema) {
         this.schema = schema;
-        unmarshaller.setSchema(schema);
-        marshaller.setSchema(schema);
     }
 
     public void validate(String line) throws IOException, SAXException {

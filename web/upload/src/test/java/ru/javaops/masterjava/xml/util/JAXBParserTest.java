@@ -1,6 +1,5 @@
 package ru.javaops.masterjava.xml.util;
 
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import ru.javaops.masterjava.xml.schema.CityType;
 import ru.javaops.masterjava.xml.schema.ObjectFactory;
@@ -13,16 +12,21 @@ import static com.google.common.io.Resources.getResource;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class JAXBParserTest {
-    private static final JAXBParser JAXB_PARSER = new JAXBParser(ObjectFactory.class);
+    // https://google.github.io/styleguide/javaguide.html#s5.2.4-constant-names
+    private static final JAXBParser parser;
+    private static final JAXBMarshaller marshaller;
+    private static final JAXBUnmarshaller unmarshaller;
 
-    @BeforeAll
-    static void init() {
-        JAXB_PARSER.setSchema(Schemas.ofClasspath("payload.xsd"));
+    static {
+        parser = new JAXBParser(ObjectFactory.class);
+        parser.setSchema(Schemas.ofClasspath("payload.xsd"));
+        marshaller = parser.createMarshaller();
+        unmarshaller = parser.createUnmarshaller();
     }
 
     @Test
     void testPayload() throws Exception {
-        var payload = (Payload) JAXB_PARSER.unmarshal(
+        var payload = (Payload) unmarshaller.unmarshal(
                 getResource("payload.xml").openStream()
         );
 
@@ -33,14 +37,14 @@ class JAXBParserTest {
         assertEquals("Admin", payload.getUsers().getUser().get(1).getValue());
         assertEquals("deleted", payload.getUsers().getUser().get(2).getFlag().value());
 
-        var payloadAsLine = JAXB_PARSER.marshal(payload);
-        JAXB_PARSER.validate(payloadAsLine);
+        var payloadAsLine = marshaller.marshal(payload);
+        parser.validate(payloadAsLine);
         System.out.println(payloadAsLine);
     }
 
     @Test
     void testCity() throws Exception {
-        JAXBElement<CityType> cityElement = JAXB_PARSER.unmarshal(
+        JAXBElement<CityType> cityElement = unmarshaller.unmarshal(
                 getResource("city.xml").openStream()
         );
         var city = cityElement.getValue();
@@ -52,8 +56,8 @@ class JAXBParserTest {
                 new QName("http://javaops.ru", "City"), CityType.class, city
         );
 
-        String cityAsLine = JAXB_PARSER.marshal(expectedCityElement);
-        JAXB_PARSER.validate(cityAsLine);
+        String cityAsLine = marshaller.marshal(expectedCityElement);
+        parser.validate(cityAsLine);
         System.out.println(cityAsLine);
     }
 }
