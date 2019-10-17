@@ -43,10 +43,10 @@ public class UploadServlet extends HttpServlet {
                 // http://docs.oracle.com/javaee/6/tutorial/doc/glraq.html
                 var filePart = request.getPart("fileToUpload");
                 try (var in = filePart.getInputStream()) {
-                    var alreadyPresentUsers = userProcessor.process(in, chunkSize);
-                    log.info("Already present in DB " + alreadyPresentUsers.size() + " users");
+                    var failed = userProcessor.process(in, chunkSize);
+                    log.info("Failed users: " + failed);
                     final var webContext = new WebContext(request, response, request.getServletContext(),
-                            request.getLocale(), ImmutableMap.of("users", alreadyPresentUsers));
+                            request.getLocale(), ImmutableMap.of("users", failed));
                     engine.process("result", webContext, response.getWriter());
                     return;
                 }
