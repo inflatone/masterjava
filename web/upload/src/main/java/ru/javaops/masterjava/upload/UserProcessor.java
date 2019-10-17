@@ -1,5 +1,6 @@
 package ru.javaops.masterjava.upload;
 
+import one.util.streamex.IntStreamEx;
 import ru.javaops.masterjava.persist.DBIProvider;
 import ru.javaops.masterjava.persist.dao.UserDao;
 import ru.javaops.masterjava.persist.model.User;
@@ -19,7 +20,9 @@ public class UserProcessor {
     private static final JAXBParser jaxbParser = new JAXBParser(ObjectFactory.class);
     private static UserDao userDao = DBIProvider.getDao(UserDao.class);
 
-
+    /*
+     * return users, already present in DB
+     */
     public List<User> process(final InputStream in, int chunkSize) throws XMLStreamException, JAXBException {
         final var processor = new StaxStreamProcessor(in);
         final var unmarshaller = jaxbParser.createUnmarshaller();
@@ -29,7 +32,10 @@ public class UserProcessor {
             final var user = new User(xmlUser.getValue(), xmlUser.getEmail(), UserFlag.valueOf(xmlUser.getFlag().value()));
             users.add(user);
         }
-        userDao.insertBatch(users, chunkSize);
-        return users;
+        int[] result = userDao.insertBatch(users, chunkSize);
+        return IntStreamEx.range(0, users.size())
+                .filter(i -> result[i] == 0)
+                .mapToObj(users::get)
+                .toList();
     }
 }

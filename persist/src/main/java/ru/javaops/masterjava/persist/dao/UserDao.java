@@ -35,6 +35,7 @@ public abstract class UserDao implements AbstractDao {
     @Override
     public abstract void clean();
 
-    @SqlBatch("INSERT INTO users (full_name, email, flag) VALUES (:fullName, :email, CAST(:flag AS USER_FLAG))")
-    public abstract void insertBatch(@BindBean List<User> users, @BatchChunkSize int chunkSize);
+    @SqlBatch("INSERT INTO users (full_name, email, flag) VALUES (:fullName, :email, CAST(:flag AS USER_FLAG))" +
+            "ON CONFLICT DO NOTHING ")
+    public abstract int[] insertBatch(@BindBean List<User> users, @BatchChunkSize int chunkSize);
 }
