@@ -15,8 +15,10 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.XMLEvent;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.concurrent.Callable;
+import java.util.Map;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -30,82 +32,70 @@ public class UserProcessor {
 
     private ExecutorService executorService = Executors.newFixedThreadPool(NUMBER_THREADS);
 
-    public static class FailedChunk {
-        public String emailOrRange;
-        public String reason;
+    public static class FailedEmails {
+        String emailsOrRange;
+        String reason;
 
-        FailedChunk(String emailOrRange, String reason) {
-            this.emailOrRange = emailOrRange;
+        FailedEmails(String emailsOrRange, String reason) {
+            this.emailsOrRange = emailsOrRange;
             this.reason = reason;
         }
 
         @Override
         public String toString() {
-            return emailOrRange + " : " + reason;
+            return emailsOrRange + " : " + reason;
         }
     }
 
     /*
      * return failed users chunks
      */
-    public List<FailedChunk> process(final InputStream in, int chunkSize) throws XMLStreamException, JAXBException {
+    public List<FailedEmails> process(final InputStream in, int chunkSize) throws XMLStreamException, JAXBException {
         log.info("Start processing with chunkSize=" + chunkSize);
-        return new Callable<List<FailedChunk>>() {
-            class ChunkFuture {
-                private String emailRange;
-                private Future<List<String>> future;
 
-                public ChunkFuture(List<User> userChunk, Future<List<String>> future) {
-                    this.future = future;
-                    this.emailRange = userChunk.get(0).getEmail();
-                    if (userChunk.size() > 1) {
-                        this.emailRange += '-' + userChunk.get(userChunk.size() - 1).getEmail();
-                    }
-                }
+        var chunkFutures = new LinkedHashMap<String, Future<List<String>>>(); // ordered map (emailRange -> chunk future)
+        int id = userDao.getSeqAndSkip(chunkSize);
+        var userChunk = new ArrayList<User>(chunkSize);
+        final var processor = new StaxStreamProcessor(in);
+        final var unmarshaller = jaxbParser.createUnmarshaller();
+
+        while (processor.doUntil(XMLEvent.START_ELEMENT, "User")) {
+            var xmlUser = unmarshaller.unmarshal(processor.getReader(), ru.javaops.masterjava.xml.schema.User.class);
+            final var user = new User(id++, xmlUser.getValue(), xmlUser.getEmail(), UserFlag.valueOf(xmlUser.getFlag().value()));
+            userChunk.add(user);
+            if (userChunk.size() == chunkSize) {
+                addChunkFutures(chunkFutures, userChunk);
+                userChunk = new ArrayList<>(chunkSize);
+                id = userDao.getSeqAndSkip(chunkSize);
             }
+        }
 
-            @Override
-            public List<FailedChunk> call() throws XMLStreamException, JAXBException {
-                List<ChunkFuture> futures = new ArrayList<>();
-                int id = userDao.getSeqAndSkip(chunkSize);
-                var userChunk = new ArrayList<User>(chunkSize);
-                final var processor = new StaxStreamProcessor(in);
-                final var unmarshaller = jaxbParser.createUnmarshaller();
+        if (!userChunk.isEmpty()) {
+            addChunkFutures(chunkFutures, userChunk);
+        }
 
-                while (processor.doUntil(XMLEvent.START_ELEMENT, "User")) {
-                    var xmlUser = unmarshaller.unmarshal(processor.getReader(), ru.javaops.masterjava.xml.schema.User.class);
-                    final var user = new User(id++, xmlUser.getValue(), xmlUser.getEmail(), UserFlag.valueOf(xmlUser.getFlag().value()));
-                    userChunk.add(user);
-                    if (userChunk.size() == chunkSize) {
-                        futures.add(submit(userChunk));
-                        userChunk = new ArrayList<>(chunkSize);
-                        id = userDao.getSeqAndSkip(chunkSize);
-                    }
-                }
-
-                if (!userChunk.isEmpty()) {
-                    futures.add(submit(userChunk));
-                }
-
-                var failedChunks = new ArrayList<FailedChunk>();
-                futures.forEach(chunk -> {
-                    try {
-
-                    } catch (Exception e) {
-                        log.error(chunk.emailRange + " failed", e);
-                        failedChunks.add(new FailedChunk(chunk.emailRange, e.toString()));
-                    }
-                });
-                return failedChunks;
+        var failed = new ArrayList<FailedEmails>();
+        var allAlreadyPresents = new ArrayList<String>();
+        chunkFutures.forEach((emailRange, task) -> {
+            try {
+                List<String> alreadyPresentsInChunk = task.get();
+                log.info("{} successfully executed with already presents: {}", emailRange, alreadyPresentsInChunk);
+                allAlreadyPresents.addAll(alreadyPresentsInChunk);
+            } catch (InterruptedException | ExecutionException e) {
+                log.error(emailRange + " failed", e);
+                failed.add(new FailedEmails(emailRange, e.toString()));
             }
+        });
+        if (!allAlreadyPresents.isEmpty()) {
+            failed.add(new FailedEmails(allAlreadyPresents.toString(), "already presents"));
+        }
+        return failed;
+    }
 
-            private ChunkFuture submit(List<User> userChunk) {
-                var chunkFuture = new ChunkFuture(userChunk,
-                        executorService.submit(() -> userDao.insertAndGetConflictEmails(userChunk))
-                );
-                log.info("Submit chunk: " + chunkFuture.emailRange);
-                return chunkFuture;
-            }
-        }.call();
+    private void addChunkFutures(Map<String, Future<List<String>>> chunkFutures, List<User> userChunk) {
+        var emailRange = String.format("[%s-%s]", userChunk.get(0).getEmail(), userChunk.get(userChunk.size() - 1).getEmail());
+        var submittedTask = executorService.submit(() -> userDao.insertAndGetConflictEmails(userChunk));
+        chunkFutures.put(emailRange, submittedTask);
+        log.info("Submit chunk: " + emailRange);
     }
 }
