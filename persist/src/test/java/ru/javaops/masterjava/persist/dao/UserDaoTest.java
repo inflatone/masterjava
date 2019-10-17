@@ -13,7 +13,7 @@ import static ru.javaops.masterjava.persist.UserTestData.FIST5_USERS;
 
 class UserDaoTest extends AbstractDaoTest<UserDao> {
 
-    public UserDaoTest() {
+    UserDaoTest() {
         super(UserDao.class);
     }
 
@@ -28,8 +28,16 @@ class UserDaoTest extends AbstractDaoTest<UserDao> {
     }
 
     @Test
-    public void getWithLimit() {
+    void getWithLimit() {
         List<User> users = dao.getWithLimit(5);
         assertEquals(FIST5_USERS, users);
     }
+
+    @Test
+    void insertBatch() throws Exception {
+        dao.clean();
+        dao.insertBatch(FIST5_USERS, 3);
+        assertEquals(5, dao.getWithLimit(100).size());
+    }
+
 }
