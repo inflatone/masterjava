@@ -1,7 +1,7 @@
 package ru.javaops.masterjava.upload;
 
 import com.google.common.collect.ImmutableMap;
-import org.slf4j.Logger;
+import lombok.extern.slf4j.Slf4j;
 import org.thymeleaf.context.WebContext;
 
 import javax.servlet.ServletException;
@@ -15,13 +15,12 @@ import javax.xml.stream.XMLStreamException;
 import java.io.IOException;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.slf4j.LoggerFactory.getLogger;
 import static ru.javaops.masterjava.common.web.ThymeleafListener.engine;
 
+@Slf4j
 @WebServlet(urlPatterns = "/", loadOnStartup = 1)
 @MultipartConfig(fileSizeThreshold = 1024 * 1024 * 10) // 10 MB in memory limit
 public class UploadServlet extends HttpServlet {
-    private static final Logger log = getLogger(UploadServlet.class);
     private static final int CHUNK_SIZE = 2000;
 
     private final UserProcessor userProcessor = new UserProcessor();

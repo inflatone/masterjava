@@ -1,7 +1,8 @@
 package ru.javaops.masterjava.upload;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import ru.javaops.masterjava.persist.DBIProvider;
 import ru.javaops.masterjava.persist.dao.UserDao;
 import ru.javaops.masterjava.persist.model.User;
@@ -23,8 +24,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+@Slf4j
 public class UserProcessor {
-    private static final Logger log = LoggerFactory.getLogger(UserProcessor.class);
     private static final int NUMBER_THREADS = 4;
 
     private static final JAXBParser jaxbParser = new JAXBParser(ObjectFactory.class);
@@ -32,14 +33,10 @@ public class UserProcessor {
 
     private ExecutorService executorService = Executors.newFixedThreadPool(NUMBER_THREADS);
 
+    @AllArgsConstructor
     public static class FailedEmails {
         String emailsOrRange;
         String reason;
-
-        FailedEmails(String emailsOrRange, String reason) {
-            this.emailsOrRange = emailsOrRange;
-            this.reason = reason;
-        }
 
         @Override
         public String toString() {
@@ -56,8 +53,8 @@ public class UserProcessor {
         var chunkFutures = new LinkedHashMap<String, Future<List<String>>>(); // ordered map (emailRange -> chunk future)
         int id = userDao.getSeqAndSkip(chunkSize);
         var userChunk = new ArrayList<User>(chunkSize);
-        final var processor = new StaxStreamProcessor(in);
-        final var unmarshaller = jaxbParser.createUnmarshaller();
+        val processor = new StaxStreamProcessor(in);
+        val unmarshaller = jaxbParser.createUnmarshaller();
 
         while (processor.doUntil(XMLEvent.START_ELEMENT, "User")) {
             var xmlUser = unmarshaller.unmarshal(processor.getReader(), ru.javaops.masterjava.xml.schema.User.class);
