@@ -6,7 +6,7 @@ import lombok.val;
 import ru.javaops.masterjava.persist.DBIProvider;
 import ru.javaops.masterjava.persist.dao.UserDao;
 import ru.javaops.masterjava.persist.model.User;
-import ru.javaops.masterjava.persist.model.UserFlag;
+import ru.javaops.masterjava.persist.model.type.UserFlag;
 import ru.javaops.masterjava.xml.schema.ObjectFactory;
 import ru.javaops.masterjava.xml.util.JAXBParser;
 import ru.javaops.masterjava.xml.util.StaxStreamProcessor;
@@ -58,7 +58,7 @@ public class UserProcessor {
 
         while (processor.doUntil(XMLEvent.START_ELEMENT, "User")) {
             var xmlUser = unmarshaller.unmarshal(processor.getReader(), ru.javaops.masterjava.xml.schema.User.class);
-            final var user = new User(id++, xmlUser.getValue(), xmlUser.getEmail(), UserFlag.valueOf(xmlUser.getFlag().value()));
+            val user = new User(id++, xmlUser.getValue(), xmlUser.getEmail(), UserFlag.valueOf(xmlUser.getFlag().value()), null);
             userChunk.add(user);
             if (userChunk.size() == chunkSize) {
                 addChunkFutures(chunkFutures, userChunk);
