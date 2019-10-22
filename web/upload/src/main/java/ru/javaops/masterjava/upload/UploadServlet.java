@@ -23,7 +23,7 @@ import static ru.javaops.masterjava.common.web.ThymeleafListener.engine;
 public class UploadServlet extends HttpServlet {
     private static final int CHUNK_SIZE = 2000;
 
-    private final UserProcessor userProcessor = new UserProcessor();
+    private final PayloadProcessor processor = new PayloadProcessor();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -42,7 +42,7 @@ public class UploadServlet extends HttpServlet {
                 // http://docs.oracle.com/javaee/6/tutorial/doc/glraq.html
                 var filePart = request.getPart("fileToUpload");
                 try (var in = filePart.getInputStream()) {
-                    var failed = userProcessor.process(in, chunkSize);
+                    var failed = processor.process(in, chunkSize);
                     log.info("Failed users: " + failed);
                     final var webContext = new WebContext(request, response, request.getServletContext(),
                             request.getLocale(), ImmutableMap.of("users", failed));
