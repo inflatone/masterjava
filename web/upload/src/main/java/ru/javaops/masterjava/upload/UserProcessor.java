@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import ru.javaops.masterjava.persist.DBIProvider;
 import ru.javaops.masterjava.persist.dao.UserDao;
+import ru.javaops.masterjava.persist.model.City;
 import ru.javaops.masterjava.persist.model.User;
 import ru.javaops.masterjava.persist.model.type.UserFlag;
 import ru.javaops.masterjava.upload.PayloadProcessor.FailedEmails;
@@ -35,22 +36,28 @@ public class UserProcessor {
     /*
      * return failed users chunks
      */
-    public List<FailedEmails> process(final StaxStreamProcessor processor, int chunkSize) throws XMLStreamException, JAXBException {
+    public List<FailedEmails> process(final StaxStreamProcessor processor, Map<String, City> cities, int chunkSize) throws XMLStreamException, JAXBException {
         log.info("Start processing with chunkSize=" + chunkSize);
 
         var chunkFutures = new LinkedHashMap<String, Future<List<String>>>(); // ordered map (emailRange -> chunk future)
         int id = userDao.getSeqAndSkip(chunkSize);
         var userChunk = new ArrayList<User>(chunkSize);
         val unmarshaller = jaxbParser.createUnmarshaller();
+        var failed = new ArrayList<FailedEmails>();
 
         while (processor.doUntil(XMLEvent.START_ELEMENT, "User")) {
+            String cityRef = processor.getAttribute("city"); // unmarshal doesn't get city ref
             var xmlUser = unmarshaller.unmarshal(processor.getReader(), ru.javaops.masterjava.xml.schema.User.class);
-            val user = new User(id++, xmlUser.getValue(), xmlUser.getEmail(), UserFlag.valueOf(xmlUser.getFlag().value()), null);
-            userChunk.add(user);
-            if (userChunk.size() == chunkSize) {
-                addChunkFutures(chunkFutures, userChunk);
-                userChunk = new ArrayList<>(chunkSize);
-                id = userDao.getSeqAndSkip(chunkSize);
+            if (cities.get(cityRef) == null) {
+                failed.add(new FailedEmails(xmlUser.getEmail(), "City '" + cityRef + "' is not present in DB"));
+            } else {
+                val user = new User(id++, xmlUser.getValue(), xmlUser.getEmail(), UserFlag.valueOf(xmlUser.getFlag().value()), null);
+                userChunk.add(user);
+                if (userChunk.size() == chunkSize) {
+                    addChunkFutures(chunkFutures, userChunk);
+                    userChunk = new ArrayList<>(chunkSize);
+                    id = userDao.getSeqAndSkip(chunkSize);
+                }
             }
         }
 
@@ -58,7 +65,6 @@ public class UserProcessor {
             addChunkFutures(chunkFutures, userChunk);
         }
 
-        var failed = new ArrayList<FailedEmails>();
         var allAlreadyPresents = new ArrayList<String>();
         chunkFutures.forEach((emailRange, task) -> {
             try {

@@ -11,6 +11,7 @@ import java.util.List;
 
 public class PayloadProcessor {
     private final UserProcessor userProcessor = new UserProcessor();
+    private final CityProcessor cityProcessor = new CityProcessor();
 
     @AllArgsConstructor
     public static class FailedEmails {
@@ -25,6 +26,7 @@ public class PayloadProcessor {
 
     public List<FailedEmails> process(InputStream in, int chunkSize) throws XMLStreamException, JAXBException {
         val processor = new StaxStreamProcessor(in);
-        return userProcessor.process(processor, chunkSize);
+        val cities = cityProcessor.process(processor);
+        return userProcessor.process(processor, cities, chunkSize);
     }
 }
