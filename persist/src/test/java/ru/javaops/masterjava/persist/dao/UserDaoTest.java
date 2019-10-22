@@ -18,12 +18,12 @@ class UserDaoTest extends AbstractDaoTest<UserDao> {
     }
 
     @BeforeAll
-    static void init() throws Exception {
+    static void init() {
         UserTestData.init();
     }
 
     @BeforeEach
-    void setUp() throws Exception {
+    void setUp() {
         UserTestData.setUp();
     }
 

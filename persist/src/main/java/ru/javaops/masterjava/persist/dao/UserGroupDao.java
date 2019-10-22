@@ -9,7 +9,7 @@ import ru.javaops.masterjava.persist.model.UserGroup;
 import java.util.List;
 import java.util.Set;
 
-@RegisterMapperFactory((EntityMapperFactory.class))
+@RegisterMapperFactory(EntityMapperFactory.class)
 public abstract class UserGroupDao implements AbstractDao {
     @Override
     @SqlUpdate("TRUNCATE user_group CASCADE")

@@ -1,8 +1,11 @@
 package ru.javaops.masterjava.persist.dao;
 
+import org.junit.jupiter.api.extension.ExtendWith;
 import ru.javaops.masterjava.persist.DBIProvider;
 import ru.javaops.masterjava.persist.DBITestProvider;
+import ru.javaops.masterjava.persist.TimingExtension;
 
+@ExtendWith(TimingExtension.class)
 abstract class AbstractDaoTest<DAO extends AbstractDao> {
     static {
         DBITestProvider.initDBI();
@@ -10,7 +13,7 @@ abstract class AbstractDaoTest<DAO extends AbstractDao> {
 
     protected DAO dao;
 
-    protected AbstractDaoTest(Class<DAO> daoClass) {
+    AbstractDaoTest(Class<DAO> daoClass) {
         this.dao = DBIProvider.getDao(daoClass);
     }
 }
