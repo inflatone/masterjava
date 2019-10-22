@@ -28,4 +28,4 @@
         <User flag="active" city="bad2" email="user2@yandex.ru" groupRefs="masterjava01">User2</User>
         <User flag="active" city="mnsk" email="user3@yandex.ru" groupRefs="masterjava01">User3</User>
     </Users>
-</Payload> 
+</Payload>
