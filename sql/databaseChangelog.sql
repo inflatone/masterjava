@@ -52,3 +52,17 @@ CREATE TABLE user_group
     group_id INTEGER NOT NULL REFERENCES groups (id),
     CONSTRAINT users_group_idx UNIQUE (user_id, group_id)
 );
+
+--changeset inflaton:4
+CREATE TABLE mail_history
+(
+    id       SERIAL PRIMARY KEY,
+    list_to  TEXT      NULL,
+    list_cc  TEXT      NULL,
+    subject  TEXT      NULL,
+    state    TEXT      NOT NULL,
+    datetime TIMESTAMP NOT NULL
+);
+
+COMMENT ON TABLE mail_history IS 'История отправки email';
+COMMENT ON COLUMN mail_history.datetime IS 'Время отправки';

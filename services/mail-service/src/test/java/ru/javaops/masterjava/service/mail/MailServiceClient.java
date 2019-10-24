@@ -13,9 +13,10 @@ public class MailServiceClient {
                 new QName("http://mail.service.masterjava.javaops.ru/", "MailServiceImplService")
         );
         var mailService = service.getPort(MailService.class);
+        var email = new Addressee("sane4ever@ya.ru");
+        var badEmail = new Addressee("Bad Email <bad_email.ru>");
         mailService.sendMail(
-                List.of(new Addressee("sane4ever@ya.ru", null)),
-                null, "subject", "body"
+                List.of(email, badEmail), null, "subject", "body"
         );
     }
 }

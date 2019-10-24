@@ -6,14 +6,14 @@ import ru.javaops.masterjava.persist.DBITestProvider;
 import ru.javaops.masterjava.persist.TimingExtension;
 
 @ExtendWith(TimingExtension.class)
-abstract class AbstractDaoTest<DAO extends AbstractDao> {
+public abstract class AbstractDaoTest<DAO extends AbstractDao> {
     static {
         DBITestProvider.initDBI();
     }
 
     protected DAO dao;
 
-    AbstractDaoTest(Class<DAO> daoClass) {
+    public AbstractDaoTest(Class<DAO> daoClass) {
         this.dao = DBIProvider.getDao(daoClass);
     }
 }
