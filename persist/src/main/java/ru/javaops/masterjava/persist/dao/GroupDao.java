@@ -9,6 +9,7 @@ import org.skife.jdbi.v2.sqlobject.SqlUpdate;
 import org.skife.jdbi.v2.sqlobject.customizers.RegisterMapperFactory;
 import ru.javaops.masterjava.persist.model.Group;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -35,4 +36,7 @@ public abstract class GroupDao implements AbstractDao {
         int id = insertGeneratedId(group);
         group.setId(id);
     }
+
+    @SqlUpdate("INSERT INTO groups (name, type, project_id) VALUES (:name, CAST(:type AS group_type), :projectId)")
+    public abstract void insertBatch(@BindBean Collection<Group> groups);
 }
