@@ -5,7 +5,8 @@ import javax.jws.WebParam;
 import javax.jws.WebService;
 import java.util.List;
 
-@WebService
+@WebService(targetNamespace = "http://mail.javaops.ru/")
+//@SOAPBinding(style = Style.DOCUMENT, use = Use.LITERAL, parameterStyle = ParameterStyle.WRAPPED)
 public interface MailService {
     @WebMethod
     void sendMail(
