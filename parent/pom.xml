@@ -15,7 +15,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-        <masterjava.config>/projects/configs/masterjava</masterjava.config>
+        <masterjava.config>D:/projects/configs/masterjava</masterjava.config>
 
         <!-- Logging -->
         <logback.version>1.2.3</logback.version>
