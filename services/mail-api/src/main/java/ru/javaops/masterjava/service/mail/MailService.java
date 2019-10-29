@@ -3,15 +3,15 @@ package ru.javaops.masterjava.service.mail;
 import javax.jws.WebMethod;
 import javax.jws.WebParam;
 import javax.jws.WebService;
-import java.util.List;
+import java.util.Set;
 
 @WebService(targetNamespace = "http://mail.javaops.ru/")
 //@SOAPBinding(style = Style.DOCUMENT, use = Use.LITERAL, parameterStyle = ParameterStyle.WRAPPED)
 public interface MailService {
     @WebMethod
-    void sendMail(
-            @WebParam(name = "to") List<Addressee> to,
-            @WebParam(name = "cc") List<Addressee> cc,
+    String sendToGroup(
+            @WebParam(name = "to") Set<Addressee> to,
+            @WebParam(name = "cc") Set<Addressee> cc,
             @WebParam(name = "subject") String subject,
             @WebParam(name = "body") String body
     );

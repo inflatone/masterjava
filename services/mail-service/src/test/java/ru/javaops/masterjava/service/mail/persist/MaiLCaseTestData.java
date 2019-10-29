@@ -7,6 +7,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 public class MaiLCaseTestData {
     private static final Instant now = Instant.now();
@@ -14,10 +15,10 @@ public class MaiLCaseTestData {
 
     static final List<MailCase> MAIL_CASES = List.of(
             MailCase.of(
-                    List.of(
+                    Set.of(
                             new Addressee("ИмяTo1 Фамилия1 <mailTo1@ya.ru>"),
                             new Addressee("Имя2 Фамилия2 <mailTo2@ya.ru>")),
-                    List.of(
+                    Set.of(
                             new Addressee("ИмяCc1 Фамилия1 <mail1Cc@ya.ru>"),
                             new Addressee("ИмяCc2 Фамилия2 <mailCc2@ya.ru>")),
                     "subject1", "state1"

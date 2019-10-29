@@ -7,7 +7,7 @@ import ru.javaops.masterjava.persist.model.BaseEntity;
 import ru.javaops.masterjava.service.mail.Addressee;
 
 import java.util.Date;
-import java.util.List;
+import java.util.Set;
 
 @Data
 @NoArgsConstructor
@@ -29,7 +29,7 @@ public class MailCase extends BaseEntity {
 
     private Date dateTime;
 
-    public static MailCase of(List<Addressee> to, List<Addressee> cc, String subject, String state) {
+    public static MailCase of(Set<Addressee> to, Set<Addressee> cc, String subject, String state) {
         return new MailCase(JOINER.join(to), JOINER.join(cc), subject, state, new Date());
     }
 }

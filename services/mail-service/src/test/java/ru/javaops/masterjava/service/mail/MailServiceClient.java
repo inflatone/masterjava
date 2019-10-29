@@ -4,7 +4,7 @@ import javax.xml.namespace.QName;
 import javax.xml.ws.Service;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.List;
+import java.util.Set;
 
 public class MailServiceClient {
     public static void main(String[] args) throws MalformedURLException {
@@ -14,8 +14,8 @@ public class MailServiceClient {
         );
         var mailService = service.getPort(MailService.class);
         var email = new Addressee("sane4ever@ya.ru");
-        mailService.sendMail(
-                List.of(email), null, "subject", "body"
+        mailService.sendToGroup(
+                Set.of(email), null, "subject", "body"
         );
     }
 }
