@@ -27,6 +27,16 @@
                     <failOnMissingWebXml>false</failOnMissingWebXml>
                     <webResources>
                         <resource>
+                            <directory>src/main/webapp</directory>
+                        </resource>
+                        <resource>
+                            <directory>${masterjava.config}</directory>
+                            <includes>
+                                <include>version.html</include>
+                            </includes>
+                            <filtering>true</filtering>
+                        </resource>
+                        <resource>
                             <directory>${masterjava.config}</directory>
                             <includes>
                                 <include>wsdl/mailService.wsdl</include>
@@ -37,16 +47,6 @@
                 </configuration>
             </plugin>
         </plugins>
-
-        <resources>
-            <resource>
-                <directory>src/main/resources</directory>
-                <includes>
-                    <include>mail.conf</include>
-                </includes>
-                <filtering>true</filtering>
-            </resource>
-        </resources>
     </build>
 
     <dependencies>
