@@ -14,8 +14,15 @@ public class MailServiceClient {
         );
         var mailService = service.getPort(MailService.class);
         var email = new Addressee("sane4ever@ya.ru");
-        mailService.sendToGroup(
-                Set.of(email), null, "subject", "body"
+        var badEmail = new Addressee("Bad Email <bad_email.ru>");
+
+        String state = mailService.sendToGroup(
+                Set.of(email), null, "Group mail test", "Group mail body"
         );
+        System.out.println("Group mail state: " + state);
+
+        GroupResult groupResult = mailService.sendBulk(
+                Set.of(email, badEmail), "Send bulk test", "Bulk mail body");
+        System.out.println("\nBulk mail groupResult:\n" + groupResult);
     }
 }
