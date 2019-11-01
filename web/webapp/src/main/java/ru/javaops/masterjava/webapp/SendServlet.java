@@ -2,6 +2,7 @@ package ru.javaops.masterjava.webapp;
 
 import lombok.extern.slf4j.Slf4j;
 import ru.javaops.masterjava.service.mail.MailWSClient;
+import ru.javaops.masterjava.web.WebStateException;
 
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -29,7 +30,7 @@ public class SendServlet extends HttpServlet {
         response.getWriter().write(result);
     }
 
-    private String getParametersAndSend(HttpServletRequest request) {
+    private String getParametersAndSend(HttpServletRequest request) throws WebStateException {
         var users = request.getParameter("users");
         var subject = request.getParameter("subject");
         var body = request.getParameter("body");

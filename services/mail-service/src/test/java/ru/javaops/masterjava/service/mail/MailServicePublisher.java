@@ -15,7 +15,8 @@ public class MailServicePublisher {
 
         var endpoint = Endpoint.create(new MailServiceImpl());
         List<Source> metadata = List.of(
-                new StreamSource(Configs.getConfigFile("wsdl/mailService.wsdl"))
+                new StreamSource(Configs.getConfigFile("wsdl/mailService.wsdl")),
+                new StreamSource(Configs.getConfigFile("wsdl/common.xsd"))
         );
         endpoint.setMetadata(metadata);
         endpoint.publish("http://localhost:8080/mail/mailService");
