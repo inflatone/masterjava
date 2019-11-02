@@ -8,6 +8,7 @@ import ru.javaops.masterjava.web.WebStateException;
 import ru.javaops.masterjava.web.WsClient;
 
 import javax.xml.namespace.QName;
+import java.util.List;
 import java.util.Set;
 
 import static com.google.common.io.Resources.getResource;
@@ -25,17 +26,21 @@ public class MailWSClient {
         WS_CLIENT.init("mail", "/mail/mailService?wsdl");
     }
 
-    public static String sendToGroup(final Set<Addressee> to, final Set<Addressee> cc, final String subject, final String body) throws WebStateException {
+    public static String sendToGroup(
+            final Set<Addressee> to, final Set<Addressee> cc, final String subject, final String body, final List<Attachment> attachments
+    ) throws WebStateException {
         log.info("Send to group ('" + to + "') cc '" + cc + "' subject '" + subject
                 + '\'' + (log.isDebugEnabled() ? "\nbody=" + body : ""));
-        var status = WS_CLIENT.getPort().sendToGroup(to, cc, subject, body);
+        var status = WS_CLIENT.getPort().sendToGroup(to, cc, subject, body, attachments);
         log.info("Send to group with status: " + status);
         return status;
     }
 
-    public static GroupResult sendBulk(final Set<Addressee> to, final String subject, final String body) throws WebStateException {
+    public static GroupResult sendBulk(
+            final Set<Addressee> to, final String subject, final String body, final List<Attachment> attachments
+    ) throws WebStateException {
         log.info("Send bulk to '" + to + "' subject '" + subject + '\'' + (log.isDebugEnabled() ? "\nbody=" + body : ""));
-        var result = WS_CLIENT.getPort().sendBulk(to, subject, body);
+        var result = WS_CLIENT.getPort().sendBulk(to, subject, body, attachments);
         log.info("Sent bulk with result: " + result);
         return result;
     }

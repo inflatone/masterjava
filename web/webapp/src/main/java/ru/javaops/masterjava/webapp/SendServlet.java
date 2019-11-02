@@ -34,7 +34,7 @@ public class SendServlet extends HttpServlet {
         var users = request.getParameter("users");
         var subject = request.getParameter("subject");
         var body = request.getParameter("body");
-        var groupResult = MailWSClient.sendBulk(MailWSClient.split(users), subject, body);
+        var groupResult = MailWSClient.sendBulk(MailWSClient.split(users), subject, body, null);
         var result = groupResult.toString();
         log.info("Processing finished with result: {}", result);
         return result;
