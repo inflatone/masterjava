@@ -8,6 +8,7 @@ import ru.javaops.masterjava.web.WebStateException;
 import ru.javaops.masterjava.web.WsClient;
 
 import javax.xml.namespace.QName;
+import javax.xml.ws.soap.MTOMFeature;
 import java.util.List;
 import java.util.Set;
 
@@ -31,7 +32,7 @@ public class MailWSClient {
     ) throws WebStateException {
         log.info("Send to group ('" + to + "') cc '" + cc + "' subject '" + subject
                 + '\'' + (log.isDebugEnabled() ? "\nbody=" + body : ""));
-        var status = WS_CLIENT.getPort().sendToGroup(to, cc, subject, body, attachments);
+        var status = getPort().sendToGroup(to, cc, subject, body, attachments);
         log.info("Send to group with status: " + status);
         return status;
     }
@@ -40,7 +41,7 @@ public class MailWSClient {
             final Set<Addressee> to, final String subject, final String body, final List<Attachment> attachments
     ) throws WebStateException {
         log.info("Send bulk to '" + to + "' subject '" + subject + '\'' + (log.isDebugEnabled() ? "\nbody=" + body : ""));
-        var result = WS_CLIENT.getPort().sendBulk(to, subject, body, attachments);
+        var result = getPort().sendBulk(to, subject, body, attachments);
         log.info("Sent bulk with result: " + result);
         return result;
     }
@@ -48,5 +49,9 @@ public class MailWSClient {
     public static Set<Addressee> split(String addressees) {
         Iterable<String> split = Splitter.on(',').trimResults().omitEmptyStrings().split(addressees);
         return ImmutableSet.copyOf(Iterables.transform(split, Addressee::new));
+    }
+
+    private static MailService getPort() {
+        return WS_CLIENT.getPort(new MTOMFeature(1024));
     }
 }
