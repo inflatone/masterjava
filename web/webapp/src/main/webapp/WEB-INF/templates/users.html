@@ -40,6 +40,9 @@
         <textarea id="body" placeholder="mail body" cols=75 rows=5></textarea><br/>
     </p>
     <p>
+        <input id="attach" type="file">
+    </p>
+    <p>
         <button type="button" onclick="send()">Send</button>
     </p>
     <pre id="result"></pre>
@@ -51,10 +54,17 @@
             return this.value;
         }).get();
         // https://stackoverflow.com/a/22213543/548473
-        $.post(
-            "send",
-            "users=" + users + "&subject=" + $('#subject').val() + "&body=" + $('#body').val()
-        ).done(function (result) {
+        var data = new FormData();
+        data.append('users', users);
+        data.append('subject', $('#subject').val());
+        data.append('body', $('#body').val());
+        var attach = $('#attach')[0].files[0];
+        if (attach) data.append('attach', attach);
+        $.post({
+            url: 'send',
+            data: data,
+            contentType: false
+        }).done(function (result) {
             $('#result').html(result);
         }).fail(function (result) {
             $('#result').html(result);
