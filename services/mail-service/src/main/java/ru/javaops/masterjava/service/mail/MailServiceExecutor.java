@@ -18,10 +18,12 @@ public class MailServiceExecutor {
 
     private static final ExecutorService mailExecutor = Executors.newFixedThreadPool(8);
 
-    public static GroupResult sendBulk(final Set<Addressee> addressees, final String subject, final String body) throws WebStateException {
+    public static GroupResult sendBulk(
+            final Set<Addressee> addressees, final String subject, final String body, final List<Attachment> attachments
+    ) throws WebStateException {
         final CompletionService<MailResult> competitionService = new ExecutorCompletionService<>(mailExecutor);
         List<Future<MailResult>> futures = StreamEx.of(addressees)
-                .map(addressee -> competitionService.submit(() -> MailSender.sendTo(addressee, subject, body)))
+                .map(addressee -> competitionService.submit(() -> MailSender.sendTo(addressee, subject, body, attachments)))
                 .toList();
         return new Callable<GroupResult>() {
             private int success = 0;
