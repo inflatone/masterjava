@@ -4,6 +4,7 @@ import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import lombok.extern.slf4j.Slf4j;
+import ru.javaops.masterjava.web.AuthUtil;
 import ru.javaops.masterjava.web.WebStateException;
 import ru.javaops.masterjava.web.WsClient;
 
@@ -17,6 +18,10 @@ import static com.google.common.io.Resources.getResource;
 @Slf4j
 public class MailWSClient {
     private static final WsClient<MailService> WS_CLIENT;
+    public static final String USER = "user";
+    public static final String PASSWORD = "password";
+
+    public static String AUTH_HEADER = AuthUtil.encodeBasicAuthHeader(USER, PASSWORD);
 
     static {
         WS_CLIENT = new WsClient<>(
@@ -52,6 +57,8 @@ public class MailWSClient {
     }
 
     private static MailService getPort() {
-        return WS_CLIENT.getPort(new MTOMFeature(1024));
+        var port = WS_CLIENT.getPort(new MTOMFeature(1024));
+        WsClient.setAuth(port, USER, PASSWORD);
+        return port;
     }
 }
