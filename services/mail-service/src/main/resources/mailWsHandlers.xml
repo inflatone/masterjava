@@ -1,0 +1,9 @@
+<handler-chains xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/javaee_web_services_metadata_handler_2_0.xsd">
+    <handler-chain>
+        <handler>
+            <handler-name>SoapLoggingHandler</handler-name>
+            <handler-class>ru.javaops.masterjava.web.handler.SoapLoggingHandlers$ServerHandler</handler-class>
+        </handler>
+    </handler-chain>
+</handler-chains>

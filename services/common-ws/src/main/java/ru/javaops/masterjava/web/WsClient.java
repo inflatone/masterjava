@@ -8,6 +8,7 @@ import javax.xml.namespace.QName;
 import javax.xml.ws.BindingProvider;
 import javax.xml.ws.Service;
 import javax.xml.ws.WebServiceFeature;
+import javax.xml.ws.handler.Handler;
 import java.net.URL;
 
 public class WsClient<T> {
@@ -43,6 +44,13 @@ public class WsClient<T> {
         var requestContext = ((BindingProvider) port).getRequestContext();
         requestContext.put(BindingProvider.USERNAME_PROPERTY, user);
         requestContext.put(BindingProvider.PASSWORD_PROPERTY, password);
+    }
+
+    public static <T> void setHandler(T port, Handler handler) {
+        var binding = ((BindingProvider) port).getBinding();
+        var handlers = binding.getHandlerChain();
+        handlers.add(handler);
+        binding.setHandlerChain(handlers);
     }
 
     public static WebStateException getWebStateException(Throwable t, ExceptionType type) {
