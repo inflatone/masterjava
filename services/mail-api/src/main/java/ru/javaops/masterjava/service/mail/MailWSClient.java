@@ -25,8 +25,6 @@ public class MailWSClient {
     public static final String PASSWORD = "password";
     private static final ClientHandler LOGGING_HANDLER = new ClientHandler(Level.DEBUG);
 
-    public static String AUTH_HEADER = AuthUtil.encodeBasicAuthHeader(USER, PASSWORD);
-
     static {
         WS_CLIENT = new WsClient<>(
                 getResource("wsdl/mailService.wsdl"),
