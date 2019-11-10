@@ -2,15 +2,15 @@
                 xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/javaee_web_services_metadata_handler_2_0.xsd">
     <handler-chain>
         <handler>
-            <handler-name>SoapLoggingHandler</handler-name>
-            <handler-class>ru.javaops.masterjava.web.handler.SoapLoggingHandlers$ServerHandler</handler-class>
+            <handler-name>MailLoggingHandler</handler-name>
+            <handler-class>ru.javaops.masterjava.service.mail.MailHandlers$LoggingHandler</handler-class>
         </handler>
         <handler>
             <handler-name>SoapStatisticHandler</handler-name>
             <handler-class>ru.javaops.masterjava.web.handler.SoapStatisticHandler</handler-class>
         </handler>
         <handler>
-            <handler-name>SoapStatisticHandler</handler-name>
+            <handler-name>MailSecurityHandler</handler-name>
             <handler-class>ru.javaops.masterjava.service.mail.MailHandlers$SecurityHandler</handler-class>
         </handler>
     </handler-chain>
