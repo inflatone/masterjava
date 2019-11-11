@@ -43,31 +43,62 @@
         <input id="attach" type="file">
     </p>
     <p>
+        <input type="radio" name="transport" onchange="setTransport('SOAP');" checked>SOAP<br/>
+        <input type="radio" name="transport" onchange="setTransport('REST');">REST<br/>
+    </p>
+    <p>
         <button type="button" onclick="send()">Send</button>
     </p>
     <pre id="result"></pre>
 </section>
 <script type="text/javascript">
+    let transport = 'SOAP';
+
+    function setTransport(value) {
+        transport = value;
+    }
+
     function send() {
         $('#result').html("Sending...");
         var users = $('input:checkbox:checked').map(function () {
             return this.value;
         }).get();
-        // https://stackoverflow.com/a/22213543/548473
-        var data = new FormData();
-        data.append('users', users);
-        data.append('subject', $('#subject').val());
-        data.append('body', $('#body').val());
-        var attach = $('#attach')[0].files[0];
-        if (attach) data.append('attach', attach);
-        $.post({
-            url: 'send',
-            data: data,
-            contentType: false
-        }).done(function (result) {
+
+        if (users.length === 0) {
+            $('#result').html('Addresses are not selected');
+            return;
+        }
+
+        let param;
+        if (transport === 'SOAP') {
+            // https://stackoverflow.com/a/22213543/548473
+            const data = new FormData();
+            data.append('users', users);
+            data.append('subject', $('#subject').val());
+            data.append('body', $('#body').val());
+            const attach = $('#attach')[0].files[0];
+            if (attach) data.append('attach', attach);
+            param = {
+                url: 'send',
+                data: data,
+                contentType: false,
+                processData: false
+            }
+        } else if (transport === 'REST') {
+            param = {
+                url: '/mail/rest/send',
+                data: 'users=' + users + '&subject=' + $('#subject').val() + '&body=' + $('#body').val(),
+                contentType: 'application/x-www-form-urlencoded'
+            };
+        }
+
+        $.post(param).done(function (result) {
+            if (typeof result === 'object') {
+                result = JSON.stringify(result);
+            }
             $('#result').html(result);
         }).fail(function (result) {
-            $('#result').html(result);
+            $('#result').html(result.responseText);
         });
     }
 </script>
