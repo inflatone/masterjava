@@ -17,9 +17,9 @@ import java.util.List;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 @Slf4j
-@WebServlet("/send")
+@WebServlet("/sendSoap")
 @MultipartConfig
-public class SendServlet extends HttpServlet {
+public class SoapSendServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String result;
