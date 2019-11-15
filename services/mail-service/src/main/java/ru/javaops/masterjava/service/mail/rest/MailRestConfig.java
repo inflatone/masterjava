@@ -1,5 +1,6 @@
 package ru.javaops.masterjava.service.mail.rest;
 
+import org.glassfish.jersey.media.multipart.MultiPartFeature;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.slf4j.bridge.SLF4JBridgeHandler;
 
@@ -12,5 +13,6 @@ public class MailRestConfig extends ResourceConfig {
         // http://stackoverflow.com/questions/4121722
         SLF4JBridgeHandler.install();
         packages("ru.javaops.masterjava.service.mail.rest");
+        register(MultiPartFeature.class);
     }
 }

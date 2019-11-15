@@ -6,6 +6,7 @@ import ru.javaops.masterjava.service.mail.Attachment;
 
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
@@ -16,7 +17,7 @@ public class Attachments {
 
     // http://stackoverflow.com/questions/2830561/how-to-convert-an-inputstream-to-a-datahandler
     @AllArgsConstructor
-    private static class InputStreamDataSource implements DataSource {
+    private static class InputStreamDataSource implements ProxyDataSource {
         private InputStream in;
 
         @Override
@@ -24,18 +25,25 @@ public class Attachments {
             return new CloseShieldInputStream(in);
         }
 
+    }
+
+    @FunctionalInterface
+    public interface ProxyDataSource extends DataSource {
         @Override
-        public OutputStream getOutputStream() {
+        InputStream getInputStream() throws IOException;
+
+        @Override
+        default OutputStream getOutputStream() {
             throw new UnsupportedOperationException("Not implemented");
         }
 
         @Override
-        public String getContentType() {
+        default String getContentType() {
             return "application/octet-stream";
         }
 
         @Override
-        public String getName() {
+        default String getName() {
             return "";
         }
     }
