@@ -7,8 +7,8 @@ import org.hibernate.validator.constraints.NotBlank;
 import ru.javaops.masterjava.service.mail.Attachment;
 import ru.javaops.masterjava.service.mail.GroupResult;
 import ru.javaops.masterjava.service.mail.MailServiceExecutor;
-import ru.javaops.masterjava.service.mail.MailWSClient;
-import ru.javaops.masterjava.service.mail.util.Attachments.ProxyDataSource;
+import ru.javaops.masterjava.service.mail.util.MailUtils.ProxyDataSource;
+import ru.javaops.masterjava.service.mail.util.MailUtils;
 import ru.javaops.masterjava.web.WebStateException;
 
 import javax.activation.DataHandler;
@@ -40,7 +40,7 @@ public class MailRS {
     ) throws WebStateException {
         final List<Attachment> attachments = attachBodyPart == null ? List.of()
                 : List.of(parseAttach(attachBodyPart));
-        return MailServiceExecutor.sendBulk(MailWSClient.split(users), subject, body, attachments);
+        return MailServiceExecutor.sendBulk(MailUtils.split(users), subject, body, attachments);
     }
 
     private Attachment parseAttach(FormDataBodyPart attachBodyPart) {

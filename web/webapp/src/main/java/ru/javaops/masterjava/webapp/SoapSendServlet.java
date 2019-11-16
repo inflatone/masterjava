@@ -2,7 +2,7 @@ package ru.javaops.masterjava.webapp;
 
 import lombok.extern.slf4j.Slf4j;
 import ru.javaops.masterjava.service.mail.MailWSClient;
-import ru.javaops.masterjava.service.mail.util.Attachments;
+import ru.javaops.masterjava.service.mail.util.MailUtils;
 import ru.javaops.masterjava.web.WebStateException;
 
 import javax.servlet.ServletException;
@@ -40,8 +40,8 @@ public class SoapSendServlet extends HttpServlet {
         var subject = request.getParameter("subject");
         var body = request.getParameter("body");
         var filePart = request.getPart("attach");
-        var groupResult = MailWSClient.sendBulk(MailWSClient.split(users), subject, body,
-                filePart == null ? null : List.of(Attachments.getAttachment(filePart.getSubmittedFileName(), filePart.getInputStream())));
+        var groupResult = MailWSClient.sendBulk(MailUtils.split(users), subject, body,
+                filePart == null ? null : List.of(MailUtils.getAttachment(filePart.getSubmittedFileName(), filePart.getInputStream())));
         var result = groupResult.toString();
         log.info("Processing finished with result: {}", result);
         return result;

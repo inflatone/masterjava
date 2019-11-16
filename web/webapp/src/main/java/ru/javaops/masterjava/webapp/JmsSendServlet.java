@@ -1,6 +1,8 @@
 package ru.javaops.masterjava.webapp;
 
 import lombok.extern.slf4j.Slf4j;
+import ru.javaops.masterjava.service.mail.util.MailUtils;
+import ru.javaops.masterjava.service.mail.util.MailUtils.MailObject;
 
 import javax.jms.*;
 import javax.naming.InitialContext;
@@ -52,10 +54,15 @@ public class JmsSendServlet extends HttpServlet {
             log.info("Start sending");
             request.setCharacterEncoding(UTF_8.name());
             response.setCharacterEncoding(UTF_8.name());
-            var users = request.getParameter("users");
-            var subject = request.getParameter("subject");
-            var body = request.getParameter("body");
-            result = sendJms(users, subject, body);
+            var filePart = request.getPart("attach");
+            var mailObject = MailUtils.getMailOnject(
+                    request.getParameter("users"),
+                    request.getParameter("subject"),
+                    request.getParameter("body"),
+                    filePart == null ? null : filePart.getSubmittedFileName(),
+                    filePart == null ? null : filePart.getInputStream()
+            );
+            result = sendJms(mailObject);
             log.info("Processing finished with result: " + result);
         } catch (Exception e) {
             log.error("Processing failed", e);
@@ -72,10 +79,10 @@ public class JmsSendServlet extends HttpServlet {
         producer = session.createProducer((Destination) initCtx.lookup("java:comp/env/jms/queue/MailQueue"));
     }
 
-    private synchronized String sendJms(String users, String subject, String body) throws JMSException {
-        var textMessage = session.createTextMessage();
-        textMessage.setText(subject);
-        producer.send(textMessage);
+    private synchronized String sendJms(MailObject mailObject) throws JMSException {
+        var objMessage = session.createObjectMessage();
+        objMessage.setObject(mailObject);
+        producer.send(objMessage);
         return "Successfully send JMS message";
     }
 }

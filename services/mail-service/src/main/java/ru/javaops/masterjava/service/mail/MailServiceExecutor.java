@@ -3,6 +3,8 @@ package ru.javaops.masterjava.service.mail;
 import lombok.extern.slf4j.Slf4j;
 import one.util.streamex.StreamEx;
 import ru.javaops.masterjava.ExceptionType;
+import ru.javaops.masterjava.service.mail.util.MailUtils;
+import ru.javaops.masterjava.service.mail.util.MailUtils.MailObject;
 import ru.javaops.masterjava.web.WebStateException;
 import ru.javaops.masterjava.web.WsClient;
 
@@ -67,5 +69,19 @@ public class MailServiceExecutor {
                 }
             }
         }.call();
+    }
+
+    public static void sendAsync(MailObject mailObject) {
+        var addressees = MailUtils.split(mailObject.getUsers());
+        addressees.forEach(addressee -> {
+            mailExecutor.submit(() -> {
+                try {
+                    MailSender.sendTo(addressee, mailObject.getSubject(), mailObject.getBody(),
+                            List.of(MailUtils.getAttachment(mailObject.getAttachName(), mailObject.getAttachData())));
+                } catch (WebStateException e) {
+                    // already logged
+                }
+            });
+        });
     }
 }

@@ -47,11 +47,6 @@ public class MailWSClient {
         return result;
     }
 
-    public static Set<Addressee> split(String addressees) {
-        Iterable<String> split = Splitter.on(',').trimResults().omitEmptyStrings().split(addressees);
-        return ImmutableSet.copyOf(Iterables.transform(split, Addressee::new));
-    }
-
     private static MailService getPort() {
         return WS_CLIENT.getPort(new MTOMFeature(1024));
     }
