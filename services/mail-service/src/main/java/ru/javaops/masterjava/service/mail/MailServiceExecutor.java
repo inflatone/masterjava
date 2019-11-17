@@ -77,7 +77,7 @@ public class MailServiceExecutor {
             mailExecutor.submit(() -> {
                 try {
                     MailSender.sendTo(addressee, mailObject.getSubject(), mailObject.getBody(),
-                            List.of(MailUtils.getAttachment(mailObject.getAttachName(), mailObject.getAttachData())));
+                            MailUtils.getAttachments(mailObject.getAttachments()));
                 } catch (WebStateException e) {
                     // already logged
                 }

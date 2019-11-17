@@ -6,7 +6,6 @@ import com.google.common.collect.Iterables;
 import com.sun.istack.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.CloseShieldInputStream;
 import ru.javaops.masterjava.service.mail.Addressee;
 import ru.javaops.masterjava.service.mail.Attachment;
@@ -14,7 +13,10 @@ import ru.javaops.masterjava.service.mail.Attachment;
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
 import java.io.*;
+import java.util.AbstractMap.SimpleImmutableEntry;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class MailUtils {
     public static Set<Addressee> split(String addressees) {
@@ -33,17 +35,12 @@ public class MailUtils {
         @NotNull
         private String body;
 
-        private String attachName;
-
-        private byte[] attachData;
+        // http://stackoverflow.com/questions/521171/a-java-collection-of-value-pairs-tuples
+        private List<SimpleImmutableEntry<String, byte[]>> attachments;
     }
 
-    public static MailObject getMailOnject(String users, String subject, String body, String attachName, InputStream attachIn) {
-        try {
-            return new MailObject(users, subject, body, attachName, attachIn == null ? null : IOUtils.toByteArray(attachIn));
-        } catch (IOException e) {
-            throw new IllegalStateException(e);
-        }
+    public static List<Attachment> getAttachments(List<SimpleImmutableEntry<String, byte[]>> attachments) {
+        return attachments.stream().map(a -> getAttachment(a.getKey(), a.getValue())).collect(Collectors.toList());
     }
 
     public static Attachment getAttachment(String name, byte[] attachData) {
@@ -55,7 +52,6 @@ public class MailUtils {
         // http://stackoverflow.com/a/5924019/548473
         return new Attachment(name, new DataHandler((ProxyDataSource) () -> new CloseShieldInputStream(in)));
     }
-
 
 
     @FunctionalInterface

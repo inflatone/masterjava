@@ -1,7 +1,7 @@
 package ru.javaops.masterjava.webapp;
 
 import lombok.extern.slf4j.Slf4j;
-import ru.javaops.masterjava.service.mail.util.MailUtils;
+import org.apache.commons.io.IOUtils;
 import ru.javaops.masterjava.service.mail.util.MailUtils.MailObject;
 
 import javax.jms.*;
@@ -15,6 +15,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.lang.IllegalStateException;
+import java.util.AbstractMap.SimpleImmutableEntry;
+import java.util.List;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
@@ -55,12 +57,12 @@ public class JmsSendServlet extends HttpServlet {
             request.setCharacterEncoding(UTF_8.name());
             response.setCharacterEncoding(UTF_8.name());
             var filePart = request.getPart("attach");
-            var mailObject = MailUtils.getMailOnject(
+            var mailObject = new MailObject(
                     request.getParameter("users"),
                     request.getParameter("subject"),
                     request.getParameter("body"),
-                    filePart == null ? null : filePart.getSubmittedFileName(),
-                    filePart == null ? null : filePart.getInputStream()
+                    filePart == null ? List.of()
+                            : List.of(new SimpleImmutableEntry<>(filePart.getSubmittedFileName(), IOUtils.toByteArray(filePart.getInputStream())))
             );
             result = sendJms(mailObject);
             log.info("Processing finished with result: " + result);
