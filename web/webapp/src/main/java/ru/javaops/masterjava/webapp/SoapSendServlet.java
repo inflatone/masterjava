@@ -15,6 +15,8 @@ import java.io.IOException;
 import java.util.List;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static ru.javaops.masterjava.webapp.WebUtil.doAndWriteResponse;
+import static ru.javaops.masterjava.webapp.WebUtil.getNotEmptyParameter;
 
 @Slf4j
 @WebServlet("/sendSoap")
@@ -22,28 +24,17 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 public class SoapSendServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        String result;
-        try {
-            log.info("Start sending");
-            request.setCharacterEncoding(UTF_8.name());
-            response.setCharacterEncoding(UTF_8.name());
-            result = getParametersAndSend(request);
-        } catch (Exception e) {
-            log.error("Processing failed", e);
-            result = e.toString();
-        }
-        response.getWriter().write(result);
+        request.setCharacterEncoding(UTF_8.name());
+        doAndWriteResponse(response, () -> getParametersAndSend(request));
     }
 
     private String getParametersAndSend(HttpServletRequest request) throws WebStateException, IOException, ServletException {
-        var users = request.getParameter("users");
+        var users = getNotEmptyParameter(request, "users");
         var subject = request.getParameter("subject");
-        var body = request.getParameter("body");
+        var body = getNotEmptyParameter(request, "body");
         var filePart = request.getPart("attach");
         var groupResult = MailWSClient.sendBulk(MailUtils.split(users), subject, body,
                 filePart == null ? null : List.of(MailUtils.getAttachment(filePart.getSubmittedFileName(), filePart.getInputStream())));
-        var result = groupResult.toString();
-        log.info("Processing finished with result: {}", result);
-        return result;
+        return groupResult.toString();
     }
 }

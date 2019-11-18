@@ -1,7 +1,6 @@
 package ru.javaops.masterjava.webapp;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.IOUtils;
 import ru.javaops.masterjava.service.mail.util.MailUtils.MailObject;
 
 import javax.jms.*;
@@ -9,19 +8,21 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
+import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.lang.IllegalStateException;
-import java.util.AbstractMap.SimpleImmutableEntry;
-import java.util.List;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static ru.javaops.masterjava.webapp.WebUtil.createMailObject;
+import static ru.javaops.masterjava.webapp.WebUtil.doAndWriteResponse;
 
 @Slf4j
 @WebServlet("/sendJms")
+@MultipartConfig(fileSizeThreshold = 1024 * 1024 * 10, maxFileSize = 1024 * 1024 * 25)
 public class JmsSendServlet extends HttpServlet {
     private Connection connection;
     private Session session;
@@ -51,26 +52,9 @@ public class JmsSendServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        String result;
-        try {
-            log.info("Start sending");
-            request.setCharacterEncoding(UTF_8.name());
-            response.setCharacterEncoding(UTF_8.name());
-            var filePart = request.getPart("attach");
-            var mailObject = new MailObject(
-                    request.getParameter("users"),
-                    request.getParameter("subject"),
-                    request.getParameter("body"),
-                    filePart == null ? List.of()
-                            : List.of(new SimpleImmutableEntry<>(filePart.getSubmittedFileName(), IOUtils.toByteArray(filePart.getInputStream())))
-            );
-            result = sendJms(mailObject);
-            log.info("Processing finished with result: " + result);
-        } catch (Exception e) {
-            log.error("Processing failed", e);
-            result = e.toString();
-        }
-        response.getWriter().write(result);
+        request.setCharacterEncoding(UTF_8.name());
+        var mailObject = createMailObject(request);
+        doAndWriteResponse(response, () -> sendJms(mailObject));
     }
 
     private void initCtx() throws NamingException, JMSException {
