@@ -27,6 +27,8 @@ public class MailUtils {
     @Data
     @AllArgsConstructor
     public static class MailObject implements Serializable {
+        private static final long serialVersionUID = 1L;
+
         @NotNull
         private String users;
 

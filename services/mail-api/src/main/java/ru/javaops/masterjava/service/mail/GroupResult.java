@@ -6,13 +6,16 @@ import lombok.NoArgsConstructor;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
+import java.io.Serializable;
 import java.util.List;
 
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @XmlAccessorType(XmlAccessType.FIELD)
-public class GroupResult {
+public class GroupResult implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     /**
      * number of successfully sent email
      */
