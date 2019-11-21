@@ -77,10 +77,12 @@ public class MailServiceExecutor {
 
     public static scala.concurrent.Future<GroupResult> sendAsyncWithReply(MailObject mailObject, ExecutionContext context) {
         // http://doc.akka.io/docs/akka/current/java/futures.html
-        return Futures.future(
-                () -> sendBulk(MailUtils.split(mailObject.getUsers()), mailObject.getSubject(), mailObject.getBody(),
-                        getAttachments(mailObject.getAttachments())),
-                context
+        return Futures.future(() -> sendBulk(mailObject), context);
+    }
+
+    public static GroupResult sendBulk(final MailObject mailObject) throws WebStateException {
+        return sendBulk(MailUtils.split(mailObject.getUsers()), mailObject.getSubject(),
+                mailObject.getBody(), MailUtils.getAttachments(mailObject.getAttachments())
         );
     }
 
