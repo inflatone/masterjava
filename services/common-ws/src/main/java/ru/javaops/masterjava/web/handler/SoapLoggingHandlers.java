@@ -31,7 +31,15 @@ public abstract class SoapLoggingHandlers extends SoapBaseHandler {
         this.loggingLevel = loggingLevel;
     }
 
-    private static final Map<Level, Handler> HANDLER_MAP = new EnumMap<Level, Handler>(Level.class);
+    private static final Map<Level, Handler> HANDLER_MAP = new EnumMap<>(Level.class) {
+        {
+            put(Level.TRACE, Handler.DEBUG);
+            put(Level.DEBUG, Handler.DEBUG);
+            put(Level.INFO, Handler.INFO);
+            put(Level.WARN, Handler.ERROR);
+            put(Level.ERROR, Handler.ERROR);
+        }
+    };
 
     protected enum Handler {
         NONE {

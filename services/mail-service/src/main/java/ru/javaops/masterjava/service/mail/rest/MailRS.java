@@ -3,15 +3,15 @@ package ru.javaops.masterjava.service.mail.rest;
 import org.glassfish.jersey.media.multipart.BodyPartEntity;
 import org.glassfish.jersey.media.multipart.FormDataBodyPart;
 import org.glassfish.jersey.media.multipart.FormDataParam;
-import org.hibernate.validator.constraints.NotBlank;
 import ru.javaops.masterjava.service.mail.Attachment;
 import ru.javaops.masterjava.service.mail.GroupResult;
 import ru.javaops.masterjava.service.mail.MailServiceExecutor;
-import ru.javaops.masterjava.service.mail.util.MailUtils.ProxyDataSource;
 import ru.javaops.masterjava.service.mail.util.MailUtils;
+import ru.javaops.masterjava.service.mail.util.MailUtils.ProxyDataSource;
 import ru.javaops.masterjava.web.WebStateException;
 
 import javax.activation.DataHandler;
+import javax.validation.constraints.NotBlank;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import java.util.List;
@@ -33,9 +33,9 @@ public class MailRS {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     public GroupResult send(
-            @FormDataParam("users") @NotBlank String users,
+            @NotBlank @FormDataParam("users") String users,
             @FormDataParam("subject") String subject,
-            @FormDataParam("body") @NotBlank String body,
+            @NotBlank @FormDataParam("body") String body,
             @FormDataParam("attach") FormDataBodyPart attachBodyPart
     ) throws WebStateException {
         final List<Attachment> attachments = attachBodyPart == null ? List.of()

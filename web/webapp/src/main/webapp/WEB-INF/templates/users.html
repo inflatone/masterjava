@@ -87,13 +87,13 @@
             data: data,
             contentType: false,
             processData: false
-        }).done(function (result) {
-            if (typeof result === 'object') {
-                result = JSON.stringify(result);
+        }).done(function (res) {
+            if (typeof res === 'object') {
+                res = JSON.stringify(res);
             }
-            result.html(result);
-        }).fail(function (result) {
-            result.html(result.responseText);
+            result.html(res);
+        }).fail(function (res) {
+            result.html(res.responseText);
         });
     }
 </script>

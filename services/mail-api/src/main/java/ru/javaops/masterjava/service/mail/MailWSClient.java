@@ -1,8 +1,5 @@
 package ru.javaops.masterjava.service.mail;
 
-import com.google.common.base.Splitter;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Iterables;
 import lombok.extern.slf4j.Slf4j;
 import ru.javaops.masterjava.web.WebStateException;
 import ru.javaops.masterjava.web.WsClient;

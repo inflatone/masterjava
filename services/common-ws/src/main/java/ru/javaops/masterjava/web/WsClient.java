@@ -84,8 +84,6 @@ public class WsClient<T> {
         if (hostConfig.hasHandler()) {
             setHandler(port, hostConfig.clientLoggingHandler);
         }
-
-
         return port;
     }
 

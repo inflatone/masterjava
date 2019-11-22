@@ -29,6 +29,12 @@
                 </includes>
                 <filtering>true</filtering>
             </resource>
+            <resource>
+                <directory>src/main/resources</directory>
+                <includes>
+                    <include>defaults.conf</include>
+                </includes>
+            </resource>
         </resources>
     </build>
 

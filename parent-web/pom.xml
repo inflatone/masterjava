@@ -89,11 +89,11 @@
         <resources>
             <resource>
                 <directory>${masterjava.config}</directory>
-                <filtering>true</filtering>
                 <includes>
                     <include>logback.xml</include>
                     <include>app.conf</include>
                 </includes>
+                <filtering>true</filtering>
             </resource>
             <resource>
                 <directory>src/main/resources</directory>

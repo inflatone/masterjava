@@ -1,6 +1,7 @@
 package ru.javaops.masterjava.service.mail.listeners;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.activemq.ActiveMQConnectionFactory;
 import ru.javaops.masterjava.service.mail.MailServiceExecutor;
 import ru.javaops.masterjava.service.mail.util.MailUtils.MailObject;
 
@@ -37,7 +38,8 @@ public class JmsMailListener implements ServletContextListener {
 
     private QueueReceiver initReceiver() throws JMSException, NamingException {
         var initContext = new InitialContext();
-        var connectionFactory = (QueueConnectionFactory) initContext.lookup("java:comp/env/jms/ConnectionFactory");
+        var connectionFactory = (ActiveMQConnectionFactory) initContext.lookup("java:comp/env/jms/ConnectionFactory");
+        connectionFactory.setTrustAllPackages(true);
         connection = connectionFactory.createQueueConnection();
         var queueSession = connection.createQueueSession(false, Session.AUTO_ACKNOWLEDGE);
         var queue = (Queue) initContext.lookup("java:comp/env/jms/queue/MailQueue");

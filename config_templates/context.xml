@@ -47,13 +47,14 @@
               auth="Container"
               type="org.apache.activemq.ActiveMQConnectionFactory"
               factory="org.apache.activemq.jndi.JNDIReferenceFactory"
-              brokerURL="failover:(vm://localhost"
+              brokerURL="failover:(vm://localhost)"
               brokerName="LocalActiveMQBroker"
               useEmbeddedBroker="true"/>
 
     <Resource name="jms/queue/MailQueue"
               auth="Container"
               type="org.apache.activemq.command.ActiveMQQueue"
-              factory="org.apache.activemq.jndi.JNDIReferenceFactory"/>
+              factory="org.apache.activemq.jndi.JNDIReferenceFactory"
+              physicalName="MAIL.QUEUE"/>
 
 </Context>
